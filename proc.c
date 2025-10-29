@@ -481,6 +481,11 @@ kill(int pid)
 {
   struct proc *p;
 
+  if(pid == 1){
+    cprintf("kill: cannot kill init\n");
+    return -1;
+  }
+
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->pid == pid){
