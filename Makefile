@@ -90,15 +90,15 @@ ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]nopie'),)
 CFLAGS += -fno-pie -nopie
 endif
 
-xv6.img: bootblock kernel
-	dd if=/dev/zero of=xv6.img count=10000
-	dd if=bootblock of=xv6.img conv=notrunc
-	dd if=kernel of=xv6.img seek=1 conv=notrunc
+xv7.img: bootblock kernel
+	dd if=/dev/zero of=xv7.img count=10000
+	dd if=bootblock of=xv7.img conv=notrunc
+	dd if=kernel of=xv7.img seek=1 conv=notrunc
 
-xv6memfs.img: bootblock kernelmemfs
-	dd if=/dev/zero of=xv6memfs.img count=10000
-	dd if=bootblock of=xv6memfs.img conv=notrunc
-	dd if=kernelmemfs of=xv6memfs.img seek=1 conv=notrunc
+xv7memfs.img: bootblock kernelmemfs
+	dd if=/dev/zero of=xv7memfs.img count=10000
+	dd if=bootblock of=xv7memfs.img conv=notrunc
+	dd if=kernelmemfs of=xv7memfs.img seek=1 conv=notrunc
 
 bootblock: bootasm.S bootmain.c
 	$(CC) $(CFLAGS) -fno-pic -O -nostdinc -I. -c bootmain.c
@@ -190,23 +190,23 @@ fs.img: mkfs README $(UPROGS)
 clean: 
 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
 	*.o *.d *.asm *.sym vectors.S bootblock entryother \
-	initcode initcode.out kernel xv6.img fs.img kernelmemfs \
-	xv6memfs.img mkfs .gdbinit \
+	initcode initcode.out kernel xv7.img fs.img kernelmemfs \
+	xv7memfs.img mkfs .gdbinit \
 	$(UPROGS)
 
 # make a printout
 FILES = $(shell grep -v '^\#' runoff.list)
 PRINT = runoff.list runoff.spec README toc.hdr toc.ftr $(FILES)
 
-xv6.pdf: $(PRINT)
+xv7.pdf: $(PRINT)
 	./runoff
-	ls -l xv6.pdf
+	ls -l xv7.pdf
 
-print: xv6.pdf
+print: xv7.pdf
 
 # run in emulators
 
-bochs : fs.img xv6.img
+bochs : fs.img xv7.img
 	if [ ! -e .bochsrc ]; then ln -s dot-bochsrc .bochsrc; fi
 	bochs -q
 
@@ -219,25 +219,25 @@ QEMUGDB = $(shell if $(QEMU) -help | grep -q '^-gdb'; \
 ifndef CPUS
 CPUS := 2
 endif
-QEMUOPTS = -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp $(CPUS) -m 512 $(QEMUEXTRA)
+QEMUOPTS = -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv7.img,index=0,media=disk,format=raw -smp $(CPUS) -m 512 $(QEMUEXTRA)
 
-qemu: fs.img xv6.img
+qemu: fs.img xv7.img
 	$(QEMU) -serial mon:stdio $(QEMUOPTS)
 
-qemu-memfs: xv6memfs.img
-	$(QEMU) -drive file=xv6memfs.img,index=0,media=disk,format=raw -smp $(CPUS) -m 256
+qemu-memfs: xv7memfs.img
+	$(QEMU) -drive file=xv7memfs.img,index=0,media=disk,format=raw -smp $(CPUS) -m 256
 
-qemu-nox: fs.img xv6.img
+qemu-nox: fs.img xv7.img
 	$(QEMU) -nographic $(QEMUOPTS)
 
 .gdbinit: .gdbinit.tmpl
 	sed "s/localhost:1234/localhost:$(GDBPORT)/" < $^ > $@
 
-qemu-gdb: fs.img xv6.img .gdbinit
+qemu-gdb: fs.img xv7.img .gdbinit
 	@echo "*** Now run 'gdb'." 1>&2
 	$(QEMU) -serial mon:stdio $(QEMUOPTS) -S $(QEMUGDB)
 
-qemu-nox-gdb: fs.img xv6.img .gdbinit
+qemu-nox-gdb: fs.img xv7.img .gdbinit
 	@echo "*** Now run 'gdb'." 1>&2
 	$(QEMU) -nographic $(QEMUOPTS) -S $(QEMUGDB)
 
@@ -278,9 +278,9 @@ dist-test:
 # update this rule (change rev#) when it is time to
 # make a new revision.
 tar:
-	rm -rf /tmp/xv6
-	mkdir -p /tmp/xv6
-	cp dist/* dist/.gdbinit.tmpl /tmp/xv6
-	(cd /tmp; tar cf - xv6) | gzip >xv6-rev10.tar.gz  # the next one will be 10 (9/17)
+	rm -rf /tmp/xv7
+	mkdir -p /tmp/xv7
+	cp dist/* dist/.gdbinit.tmpl /tmp/xv7
+	(cd /tmp; tar cf - xv7) | gzip >xv7-rev1.tar.gz  # the next one will be 10 (9/17)
 
 .PHONY: dist-test dist

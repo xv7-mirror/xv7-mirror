@@ -9,7 +9,7 @@ mmu.h
 elf.h
 date.h
 
-# entering xv6
+# entering xv7
 entry.S
 entryother.S
 main.c
