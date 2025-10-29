@@ -20,7 +20,7 @@ main(int argc, char *argv[])
   }
 
   for(i = 1; i < argc; i++){
-    int fd = open(argv[i], O_CREATE | O_WRONLY);
+    int fd = open(argv[i], O_CREATE | O_RDWR);
 
     if(fd < 0){
       printf(2, "touch: could not create %s\n", argv[i]);
