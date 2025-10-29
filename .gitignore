@@ -1,6 +1,7 @@
 *.asm
 *.d
 *.sym
+*.o
 _*
 kernel
 user1
@@ -14,3 +15,8 @@ bootother
 bootother.out
 parport.out
 fmt
+fs.img
+entryother
+initcode
+initcode.out
+mkfs
