@@ -195,20 +195,10 @@ fs.img: mkfs $(UPROGS_HOST)
 
 clean: 
 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
-	kernel/*.o kernel/*.d userspace/*.o userspace/*.d *.d *.o kernel/*.asm userspace/*.asm *.asm kernel/*.sym userspace/*.sym *.sym kernel/vectors.S bootblock entryother \
+	kernel/*.o kernel/dev/*.o kernel/dev/char/*.o kernel/*.d kernel/dev/*.d kernel/dev/char/*.d userspace/*.o userspace/*.d *.d *.o kernel/*.asm userspace/*.asm *.asm kernel/*.sym userspace/*.sym *.sym ulib/*.o ulib/*.d kernel/vectors.S bootblock entryother \
 	initcode initcode.out xv7kernel xv7.img fs.img kernelmemfs \
 	xv7memfs.img tools/mkfs .gdbinit \
 	rm -f $(UPROGS_BASENAME)
-
-# make a printout
-FILES = $(shell grep -v '^\#' runoff.list)
-PRINT = runoff.list runoff.spec README toc.hdr toc.ftr $(FILES)
-
-xv7.pdf: $(PRINT)
-	./runoff
-	ls -l xv7.pdf
-
-print: xv7.pdf
 
 # run in emulators
 
