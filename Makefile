@@ -165,31 +165,28 @@ mkfs: tools/mkfs.c includes/kernel/fs.h
 # http://www.gnu.org/software/make/manual/html_node/Chained-Rules.html
 .PRECIOUS: %.o
 
-UPROGS_BASENAME=\
-	_cat\
-	_echo\
-	_forktest\
-	_grep\
-	_init\
-	_kill\
-	_ln\
-	_ls\
-	_mkdir\
-	_rm\
-	_sh\
-	_stressfs\
-	_usertests\
-	_wc\
-	_zombie\
-	_touch\
+UPROGS=\
+	userspace/_cat\
+	userspace/_echo\
+	userspace/_forktest\
+	userspace/_grep\
+	userspace/_init\
+	userspace/_kill\
+	userspace/_ln\
+	userspace/_ls\
+	userspace/_mkdir\
+	userspace/_rm\
+	userspace/_sh\
+	userspace/_stressfs\
+	userspace/_usertests\
+	userspace/_wc\
+	userspace/_zombie\
+	userspace/_touch\
+	userspace/test/_hello\
+	userspace/test/test2/_helloworld\
 
-UPROGS_HOST=$(UPROGS_BASENAME:%=userspace/%)
-
-fs.img: mkfs $(UPROGS_HOST)
-	@for f in $(UPROGS_HOST); do \
-		cp $$f ./; \
-	done
-	tools/mkfs fs.img $(UPROGS_BASENAME)
+fs.img: mkfs $(UPROGS)
+	tools/mkfs fs.img $(UPROGS)
 
 -include *.d
 

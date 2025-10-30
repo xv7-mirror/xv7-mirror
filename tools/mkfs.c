@@ -4,6 +4,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <assert.h>
+#include <sys/stat.h>
 
 #define stat xv7_stat  // avoid clash with host struct stat
 #include "types.h"
@@ -31,6 +32,7 @@ struct superblock sb;
 char zeroes[BSIZE];
 uint freeinode = 1;
 uint freeblock;
+uint ensure_path(uint parent, char *path);
 
 void balloc(int);
 void wsect(uint, void*);
@@ -39,6 +41,8 @@ void rinode(uint inum, struct dinode *ip);
 void rsect(uint sec, void *buf);
 uint ialloc(ushort type);
 void iappend(uint inum, void *p, int n);
+void add_dir(uint parent, const char *path, const char *name);
+void add_path(uint parent, const char *path, const char *name);
 
 // convert to intel byte order
 ushort
@@ -66,8 +70,8 @@ xint(uint x)
 int
 main(int argc, char *argv[])
 {
-  int i, cc, fd;
-  uint rootino, inum, off;
+  int i;
+  uint rootino, off;
   struct dirent de;
   char buf[BSIZE];
   struct dinode din;
@@ -126,33 +130,67 @@ main(int argc, char *argv[])
   strcpy(de.name, "..");
   iappend(rootino, &de, sizeof(de));
 
+  #undef stat
   for(i = 2; i < argc; i++){
-    assert(index(argv[i], '/') == 0);
+    struct stat st;
+    char *hostpath = argv[i];
 
-    if((fd = open(argv[i], 0)) < 0){
-      perror(argv[i]);
+    if(stat(hostpath, &st) < 0){
+      perror(hostpath);
       exit(1);
     }
 
-    // Skip leading _ in name when writing to file system.
-    // The binaries are named _rm, _cat, etc. to keep the
-    // build operating system from trying to execute them
-    // in place of system binaries like rm and cat.
-    if(argv[i][0] == '_')
-      ++argv[i];
+    char imgpath[512];
+    strncpy(imgpath, hostpath, sizeof(imgpath));
+    imgpath[sizeof(imgpath)-1] = 0;
+    if(strncmp(imgpath, "userspace/", 10) == 0)
+      memmove(imgpath, imgpath + 10, strlen(imgpath + 10) + 1);
 
-    inum = ialloc(T_FILE);
+    int ilen = strlen(imgpath);
+    while(ilen > 0 && imgpath[ilen-1] == '/')
+      imgpath[--ilen] = '\0';
 
-    bzero(&de, sizeof(de));
-    de.inum = xshort(inum);
-    strncpy(de.name, argv[i], DIRSIZ);
-    iappend(rootino, &de, sizeof(de));
+    char *slash = strrchr(imgpath, '/');
+    uint parent = rootino;
+    char *basename = imgpath;
+    char parentcopy[512];
 
-    while((cc = read(fd, buf, sizeof(buf))) > 0)
-      iappend(inum, buf, cc);
+    if(slash){
+      int prefix_len = slash - imgpath;
+      strncpy(parentcopy, imgpath, prefix_len);
+      parentcopy[prefix_len] = 0;
+      parent = ensure_path(rootino, parentcopy);
+      basename = slash + 1;
+    }
 
-    close(fd);
+    if(basename[0] == '_')
+      ++basename;
+
+    struct dirent de;
+    char buf[BSIZE];
+    int fd, cc;
+    uint inum;
+
+    if(S_ISREG(st.st_mode)){
+      if((fd = open(hostpath, 0)) < 0){
+        perror(hostpath);
+        exit(1);
+      }
+
+      inum = ialloc(T_FILE);
+
+      bzero(&de, sizeof(de));
+      de.inum = xshort(inum);
+      strncpy(de.name, basename, DIRSIZ);
+      iappend(parent, &de, sizeof(de));
+
+      while((cc = read(fd, buf, sizeof(buf))) > 0)
+        iappend(inum, buf, cc);
+
+      close(fd);
+    }
   }
+  #define stat xv7_stat
 
   // fix size of root inode dir
   rinode(rootino, &din);
@@ -293,4 +331,80 @@ iappend(uint inum, void *xp, int n)
   }
   din.size = xint(off);
   winode(inum, &din);
+}
+
+uint
+dirlookup(uint dirinum, const char *name)
+{
+  struct dinode din;
+  char buf[BSIZE];
+  struct dirent *de;
+  int i, j;
+
+  rinode(dirinum, &din);
+
+  for(i = 0; i < NDIRECT; i++){
+    uint addr = xint(din.addrs[i]);
+    if(addr == 0)
+      continue;
+    rsect(addr, buf);
+    de = (struct dirent*)buf;
+    for(j = 0; j < BSIZE / sizeof(struct dirent); j++){
+      ushort inum = xshort(de[j].inum);
+      if(inum == 0)
+        continue;
+      char nm[DIRSIZ+1];
+      memmove(nm, de[j].name, DIRSIZ);
+      nm[DIRSIZ] = 0;
+      int k = DIRSIZ - 1;
+      while(k >= 0 && (nm[k] == 0 || nm[k] == ' ')) { nm[k] = 0; k--; }
+      if(strcmp(nm, name) == 0)
+        return inum;
+    }
+  }
+  return 0;
+}
+
+uint
+ensure_path(uint parent, char *path)
+{
+  char *tok;
+  char copy[512];
+  struct dirent de;
+  uint inum;
+
+  if(path == 0 || *path == 0)
+    return parent;
+
+  strncpy(copy, path, sizeof(copy));
+  copy[sizeof(copy)-1] = 0;
+
+  tok = strtok(copy, "/");
+  while(tok){
+    uint found = dirlookup(parent, tok);
+    if(found == 0){
+      inum = ialloc(T_DIR);
+
+      bzero(&de, sizeof(de));
+      de.inum = xshort(inum);
+      strncpy(de.name, tok, DIRSIZ);
+      iappend(parent, &de, sizeof(de));
+
+      bzero(&de, sizeof(de));
+      de.inum = xshort(inum);
+      strcpy(de.name, ".");
+      iappend(inum, &de, sizeof(de));
+
+      bzero(&de, sizeof(de));
+      de.inum = xshort(parent);
+      strcpy(de.name, "..");
+      iappend(inum, &de, sizeof(de));
+
+      parent = inum;
+    } else {
+      parent = found;
+    }
+    tok = strtok(0, "/");
+  }
+  return parent;
 }
