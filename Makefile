@@ -1,13 +1,13 @@
 OBJS = \
 	kernel/bio.o\
-	kernel/console.o\
+	kernel/dev/char/console.o\
 	kernel/exec.o\
 	kernel/file.o\
 	kernel/fs.o\
-	kernel/ide.o\
+	kernel/dev/ide.o\
 	kernel/ioapic.o\
 	kernel/kalloc.o\
-	kernel/kbd.o\
+	kernel/dev/char/kbd.o\
 	kernel/lapic.o\
 	kernel/log.o\
 	kernel/main.o\
@@ -24,7 +24,7 @@ OBJS = \
 	kernel/sysproc.o\
 	kernel/trapasm.o\
 	kernel/trap.o\
-	kernel/uart.o\
+	kernel/dev/char/uart.o\
 	kernel/vectors.o\
 	kernel/vm.o\
 
