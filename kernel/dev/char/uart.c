@@ -1,7 +1,11 @@
 /*
- * UART driver for xv7
+ * UART driver
  * Copyright (c) 2025 Vladislav Prokopenko
  *
+ * Based on code from xv6 (MIT License)
+ * Copyright (c) 2006–2020 Russ Cox, Frans Kaashoek, Robert Morris, and others
+ *
+ * Licensed under the MIT License.
  */
 #include "types.h"
 #include "defs.h"
