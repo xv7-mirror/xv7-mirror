@@ -148,8 +148,13 @@ vgaputc(int c)
   } else
     crt[pos++] = (c&0xff) | 0x0700;  // black on white
 
-  if(pos < 0 || pos > 25*80)
-    panic("pos under/overflow");
+  /* 
+  * Clamp pos if overflow is detected
+  */
+  if (pos < 0)
+    pos = 0;
+  else if (pos >= 25*80)
+    pos = 25*80 - 1;
 
   if((pos/80) >= 24){  // Scroll up.
     memmove(crt, crt+80, sizeof(crt[0])*23*80);
