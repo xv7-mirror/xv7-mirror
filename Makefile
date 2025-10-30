@@ -198,7 +198,7 @@ clean:
 	kernel/*.o kernel/*.d userspace/*.o userspace/*.d *.d *.o kernel/*.asm userspace/*.asm *.asm kernel/*.sym userspace/*.sym *.sym kernel/vectors.S bootblock entryother \
 	initcode initcode.out xv7kernel xv7.img fs.img kernelmemfs \
 	xv7memfs.img tools/mkfs .gdbinit \
-	$(UPROGS)
+	rm -f $(UPROGS_BASENAME)
 
 # make a printout
 FILES = $(shell grep -v '^\#' runoff.list)
