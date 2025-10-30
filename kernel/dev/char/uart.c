@@ -79,7 +79,6 @@ void uartinit(void)
   outb(COM1 + UART_DATA, 115200 / 9600);
   outb(COM1 + UART_INT_EN, 0x00);
 
-  // 8 data bits, no parity, one stop bit
   /* 8 data bits, no parity, one stop bit */
   outb(COM1 + UART_LINE_CTL, 0x03);
 
