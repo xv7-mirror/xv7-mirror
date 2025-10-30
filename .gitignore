@@ -3,7 +3,7 @@
 *.sym
 *.o
 _*
-kernel
+xv7kernel
 user1
 userfs
 usertests

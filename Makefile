@@ -1,32 +1,32 @@
 OBJS = \
-	bio.o\
-	console.o\
-	exec.o\
-	file.o\
-	fs.o\
-	ide.o\
-	ioapic.o\
-	kalloc.o\
-	kbd.o\
-	lapic.o\
-	log.o\
-	main.o\
-	mp.o\
-	picirq.o\
-	pipe.o\
-	proc.o\
-	sleeplock.o\
-	spinlock.o\
-	string.o\
-	swtch.o\
-	syscall.o\
-	sysfile.o\
-	sysproc.o\
-	trapasm.o\
-	trap.o\
-	uart.o\
-	vectors.o\
-	vm.o\
+	kernel/bio.o\
+	kernel/console.o\
+	kernel/exec.o\
+	kernel/file.o\
+	kernel/fs.o\
+	kernel/ide.o\
+	kernel/ioapic.o\
+	kernel/kalloc.o\
+	kernel/kbd.o\
+	kernel/lapic.o\
+	kernel/log.o\
+	kernel/main.o\
+	kernel/mp.o\
+	kernel/picirq.o\
+	kernel/pipe.o\
+	kernel/proc.o\
+	kernel/sleeplock.o\
+	kernel/spinlock.o\
+	kernel/string.o\
+	kernel/swtch.o\
+	kernel/syscall.o\
+	kernel/sysfile.o\
+	kernel/sysproc.o\
+	kernel/trapasm.o\
+	kernel/trap.o\
+	kernel/uart.o\
+	kernel/vectors.o\
+	kernel/vm.o\
 
 # Cross-compiling (e.g., on Mac OS X)
 TOOLPREFIX = i386-elf-
@@ -76,9 +76,9 @@ AS = $(TOOLPREFIX)gas
 LD = $(TOOLPREFIX)ld
 OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
-CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -fno-omit-frame-pointer
+CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -fno-omit-frame-pointer -Iincludes/generic -Iincludes/kernel
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
-ASFLAGS = -m32 -gdwarf-2 -Wa,-divide
+ASFLAGS = -m32 -gdwarf-2 -Wa,-divide -Iincludes/generic -Iincludes/kernel
 # FreeBSD ld wants ``elf_i386_fbsd''
 LDFLAGS += -m $(shell $(LD) -V | grep elf_i386 2>/dev/null | head -n 1)
 
@@ -90,40 +90,40 @@ ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]nopie'),)
 CFLAGS += -fno-pie -nopie
 endif
 
-xv7.img: bootblock kernel
+xv7.img: bootblock xv7kernel
 	dd if=/dev/zero of=xv7.img count=10000
 	dd if=bootblock of=xv7.img conv=notrunc
-	dd if=kernel of=xv7.img seek=1 conv=notrunc
+	dd if=xv7kernel of=xv7.img seek=1 conv=notrunc
 
 xv7memfs.img: bootblock kernelmemfs
 	dd if=/dev/zero of=xv7memfs.img count=10000
 	dd if=bootblock of=xv7memfs.img conv=notrunc
 	dd if=kernelmemfs of=xv7memfs.img seek=1 conv=notrunc
 
-bootblock: bootasm.S bootmain.c
-	$(CC) $(CFLAGS) -fno-pic -O -nostdinc -I. -c bootmain.c
-	$(CC) $(CFLAGS) -fno-pic -nostdinc -I. -c bootasm.S
+bootblock: bootldr/bootasm.S bootldr/bootmain.c
+	$(CC) $(CFLAGS) -fno-pic -O -nostdinc -Iincludes/generic -c bootldr/bootmain.c
+	$(CC) $(CFLAGS) -fno-pic -nostdinc -Iincludes/generic -c bootldr/bootasm.S
 	$(LD) $(LDFLAGS) -N -e start -Ttext 0x7C00 -o bootblock.o bootasm.o bootmain.o
 	$(OBJDUMP) -S bootblock.o > bootblock.asm
 	$(OBJCOPY) -S -O binary -j .text bootblock.o bootblock
 	./sign.pl bootblock
 
-entryother: entryother.S
-	$(CC) $(CFLAGS) -fno-pic -nostdinc -I. -c entryother.S
+entryother: kernel/entryother.S
+	$(CC) $(CFLAGS) -fno-pic -nostdinc -I. -c kernel/entryother.S
 	$(LD) $(LDFLAGS) -N -e start -Ttext 0x7000 -o bootblockother.o entryother.o
 	$(OBJCOPY) -S -O binary -j .text bootblockother.o entryother
 	$(OBJDUMP) -S bootblockother.o > entryother.asm
 
-initcode: initcode.S
-	$(CC) $(CFLAGS) -nostdinc -I. -c initcode.S
+initcode: kernel/initcode.S
+	$(CC) $(CFLAGS) -nostdinc -I. -c kernel/initcode.S
 	$(LD) $(LDFLAGS) -N -e start -Ttext 0 -o initcode.out initcode.o
 	$(OBJCOPY) -S -O binary initcode.out initcode
 	$(OBJDUMP) -S initcode.o > initcode.asm
 
-kernel: $(OBJS) entry.o entryother initcode kernel.ld
-	$(LD) $(LDFLAGS) -T kernel.ld -o kernel entry.o $(OBJS) -b binary initcode entryother
-	$(OBJDUMP) -S kernel > kernel.asm
-	$(OBJDUMP) -t kernel | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > kernel.sym
+xv7kernel: $(OBJS) kernel/entry.o entryother initcode kernel.ld
+	$(LD) $(LDFLAGS) -T kernel.ld -o xv7kernel kernel/entry.o $(OBJS) -b binary initcode entryother
+	$(OBJDUMP) -S xv7kernel > kernel.asm
+	$(OBJDUMP) -t xv7kernel | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > kernel.sym
 
 # kernelmemfs is a copy of kernel that maintains the
 # disk image in memory instead of writing to a disk.
@@ -133,17 +133,17 @@ kernel: $(OBJS) entry.o entryother initcode kernel.ld
 # needing a scratch disk.
 MEMFSOBJS = $(filter-out ide.o,$(OBJS)) memide.o
 kernelmemfs: $(MEMFSOBJS) entry.o entryother initcode kernel.ld fs.img
-	$(LD) $(LDFLAGS) -T kernel.ld -o kernelmemfs entry.o  $(MEMFSOBJS) -b binary initcode entryother fs.img
+	$(LD) $(LDFLAGS) -T kernel.ld -o kernelmemfs kernel/entry.o  $(MEMFSOBJS) -b binary initcode entryother fs.img
 	$(OBJDUMP) -S kernelmemfs > kernelmemfs.asm
 	$(OBJDUMP) -t kernelmemfs | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > kernelmemfs.sym
 
 tags: $(OBJS) entryother.S _init
 	etags *.S *.c
 
-vectors.S: vectors.pl
-	./vectors.pl > vectors.S
+kernel/vectors.S: vectors.pl
+	./vectors.pl > kernel/vectors.S
 
-ULIB = ulib.o usys.o printf.o umalloc.o
+ULIB = ulib/ulib.o ulib/usys.o ulib/printf.o ulib/umalloc.o
 
 _%: %.o $(ULIB)
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
@@ -153,11 +153,11 @@ _%: %.o $(ULIB)
 _forktest: forktest.o $(ULIB)
 	# forktest has less library code linked in - needs to be small
 	# in order to be able to max out the proc table.
-	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o _forktest forktest.o ulib.o usys.o
+	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o _forktest forktest.o ulib/ulib.o ulib/usys.o
 	$(OBJDUMP) -S _forktest > forktest.asm
 
-mkfs: mkfs.c fs.h
-	gcc -Werror -Wall -o mkfs mkfs.c
+mkfs: tools/mkfs.c includes/kernel/fs.h
+	gcc -Werror -Wall -Itools/includes -o tools/mkfs tools/mkfs.c
 
 # Prevent deletion of intermediate files, e.g. cat.o, after first build, so
 # that disk image changes after first build are persistent until clean.  More
@@ -165,7 +165,7 @@ mkfs: mkfs.c fs.h
 # http://www.gnu.org/software/make/manual/html_node/Chained-Rules.html
 .PRECIOUS: %.o
 
-UPROGS=\
+UPROGS_BASENAME=\
 	_cat\
 	_echo\
 	_forktest\
@@ -183,16 +183,21 @@ UPROGS=\
 	_zombie\
 	_touch\
 
-fs.img: mkfs $(UPROGS)
-	./mkfs fs.img $(UPROGS)
+UPROGS_HOST=$(UPROGS_BASENAME:%=userspace/%)
+
+fs.img: mkfs $(UPROGS_HOST)
+	@for f in $(UPROGS_HOST); do \
+		cp $$f ./; \
+	done
+	tools/mkfs fs.img $(UPROGS_BASENAME)
 
 -include *.d
 
 clean: 
 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
-	*.o *.d *.asm *.sym vectors.S bootblock entryother \
-	initcode initcode.out kernel xv7.img fs.img kernelmemfs \
-	xv7memfs.img mkfs .gdbinit \
+	kernel/*.o kernel/*.d userspace/*.o userspace/*.d *.d *.o kernel/*.asm userspace/*.asm *.asm kernel/*.sym userspace/*.sym *.sym kernel/vectors.S bootblock entryother \
+	initcode initcode.out xv7kernel xv7.img fs.img kernelmemfs \
+	xv7memfs.img tools/mkfs .gdbinit \
 	$(UPROGS)
 
 # make a printout
@@ -241,47 +246,3 @@ qemu-gdb: fs.img xv7.img .gdbinit
 qemu-nox-gdb: fs.img xv7.img .gdbinit
 	@echo "*** Now run 'gdb'." 1>&2
 	$(QEMU) -nographic $(QEMUOPTS) -S $(QEMUGDB)
-
-# CUT HERE
-# prepare dist for students
-# after running make dist, probably want to
-# rename it to rev0 or rev1 or so on and then
-# check in that version.
-
-EXTRA=\
-	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
-	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
-	printf.c umalloc.c touch.c\
-	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
-	.gdbinit.tmpl gdbutil\
-
-dist:
-	rm -rf dist
-	mkdir dist
-	for i in $(FILES); \
-	do \
-		grep -v PAGEBREAK $$i >dist/$$i; \
-	done
-	sed '/CUT HERE/,$$d' Makefile >dist/Makefile
-	echo >dist/runoff.spec
-	cp $(EXTRA) dist
-
-dist-test:
-	rm -rf dist
-	make dist
-	rm -rf dist-test
-	mkdir dist-test
-	cp dist/* dist-test
-	cd dist-test; $(MAKE) print
-	cd dist-test; $(MAKE) bochs || true
-	cd dist-test; $(MAKE) qemu
-
-# update this rule (change rev#) when it is time to
-# make a new revision.
-tar:
-	rm -rf /tmp/xv7
-	mkdir -p /tmp/xv7
-	cp dist/* dist/.gdbinit.tmpl /tmp/xv7
-	(cd /tmp; tar cf - xv7) | gzip >xv7-rev1.tar.gz  # the next one will be 10 (9/17)
-
-.PHONY: dist-test dist
