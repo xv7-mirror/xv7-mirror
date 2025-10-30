@@ -147,7 +147,7 @@ vgaputc(int c)
     crt[pos++] = (c&0xff) | 0x0700;  // black on white
 
   /* 
-  * Clamp pos if overflow is detected
+  * Clamp pos if overflow/underflow is detected
   */
   if (pos < 0)
     pos = 0;
