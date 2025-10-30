@@ -106,7 +106,7 @@ bootblock: bootldr/bootasm.S bootldr/bootmain.c
 	$(LD) $(LDFLAGS) -N -e start -Ttext 0x7C00 -o bootblock.o bootasm.o bootmain.o
 	$(OBJDUMP) -S bootblock.o > bootblock.asm
 	$(OBJCOPY) -S -O binary -j .text bootblock.o bootblock
-	./sign.pl bootblock
+	tools/sign.pl bootblock
 
 entryother: kernel/entryother.S
 	$(CC) $(CFLAGS) -fno-pic -nostdinc -I. -c kernel/entryother.S
@@ -140,8 +140,8 @@ kernelmemfs: $(MEMFSOBJS) entry.o entryother initcode kernel.ld fs.img
 tags: $(OBJS) entryother.S _init
 	etags *.S *.c
 
-kernel/vectors.S: vectors.pl
-	./vectors.pl > kernel/vectors.S
+kernel/vectors.S: tools/vectors.pl
+	tools/vectors.pl > kernel/vectors.S
 
 ULIB = ulib/ulib.o ulib/usys.o ulib/printf.o ulib/umalloc.o
 
