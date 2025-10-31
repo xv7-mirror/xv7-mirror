@@ -182,9 +182,14 @@ UPROGS=\
 	userspace/bin/_wc\
 	userspace/bin/_zombie\
 	userspace/bin/_touch\
+	userspace/bin/_sleep\
+
+# misc files
+FILES=\
+	userspace/etc/initlog.txt\
 
 fs.img: mkfs $(UPROGS)
-	tools/mkfs fs.img $(UPROGS)
+	tools/mkfs fs.img $(UPROGS) $(FILES)
 
 -include *.d
 
