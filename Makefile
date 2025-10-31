@@ -159,6 +159,11 @@ _forktest: forktest.o $(ULIB)
 mkfs: tools/mkfs.c includes/kernel/fs.h
 	gcc -Werror -Wall -Itools/includes -o tools/mkfs tools/mkfs.c
 
+games/%: games/%.o $(ULIB)
+	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
+	$(OBJDUMP) -S $@ > $*.asm
+	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $@.sym
+
 # Prevent deletion of intermediate files, e.g. cat.o, after first build, so
 # that disk image changes after first build are persistent until clean.  More
 # details:
@@ -188,8 +193,16 @@ UPROGS=\
 FILES=\
 	userspace/etc/initlog.txt\
 
-fs.img: mkfs $(UPROGS)
-	tools/mkfs fs.img $(UPROGS) $(FILES)
+UPROG_LICENSES=\
+	games/banner/banner.COPYING\
+
+GAMES=\
+	games/banner/_banner\
+
+fs.img: mkfs $(UPROGS) $(GAMES)
+	cp $(GAMES) userspace/bin/
+	cp $(UPROG_LICENSES) userspace/bin/
+	tools/mkfs fs.img userspace/bin/_* $(FILES) userspace/bin/*.COPYING
 
 -include *.d
 
@@ -199,6 +212,8 @@ clean:
 	initcode initcode.out xv7kernel xv7.img fs.img kernelmemfs \
 	xv7memfs.img tools/mkfs .gdbinit \
 	rm -f $(UPROGS)
+	rm -f $(GAMES) games/banner/*.d games/banner/*.sym games/banner/*.asm games/banner/*.o\
+	rm -f userspace/bin/*.COPYING
 
 # run in emulators
 

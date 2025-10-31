@@ -110,15 +110,15 @@ panic(char *s)
 
   cli();
   cons.locking = 0;
-  cprintf("\nxv7 has panicked.\n");
-  cprintf("Below is some info that you can submit to https://codeberg.org/xv7/xv7:\n\n");
+  cprintf( "\nxv7 has panicked.\n");
+  cprintf( "Below is some info that you can submit to https://codeberg.org/xv7/xv7:\n\n");
   // use lapiccpunum so that we can call panic from mycpu()
-  cprintf("lapicid %d: panic: ", lapicid());
+  cprintf( "lapicid %d: panic: ", lapicid());
   cprintf(s);
-  cprintf("\n");
+  cprintf( "\n");
   getcallerpcs(&s, pcs);
   for(i=0; i<10; i++)
-    cprintf(" %p", pcs[i]);
+    cprintf( " %p", pcs[i]);
   panicked = 1; // freeze other CPU
   for(;;)
     ;
