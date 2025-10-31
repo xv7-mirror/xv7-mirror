@@ -55,8 +55,8 @@ main(void)
     }
     while((wpid=wait()) >= 0 && wpid != pid)
       printf(logfd, "init: reaped zombie %d\n", wpid);
-    }
 
     /* Quick delay to prevent crash loops */
     sleep(1);
+  }
 }
