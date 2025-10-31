@@ -171,6 +171,7 @@ games/%: games/%.o $(ULIB)
 .PRECIOUS: %.o
 
 UPROGS=\
+	userspace/bin/_yes\
 	userspace/bin/_cat\
 	userspace/bin/_echo\
 	userspace/bin/_forktest\
@@ -211,7 +212,7 @@ clean:
 	kernel/*.o kernel/dev/*.o kernel/dev/char/*.o kernel/*.d kernel/dev/*.d kernel/dev/char/*.d userspace/bin/*.o userspace/bin/*.d *.d *.o kernel/*.asm userspace/bin/*.asm *.asm kernel/*.sym userspace/bin/*.sym *.sym ulib/*.o ulib/*.d kernel/vectors.S bootblock entryother \
 	initcode initcode.out xv7kernel xv7.img fs.img kernelmemfs \
 	xv7memfs.img tools/mkfs .gdbinit \
-	rm -f $(UPROGS)
+	rm -f $(UPROGS) userspace/bin/_*
 	rm -f $(GAMES) games/banner/*.d games/banner/*.sym games/banner/*.asm games/banner/*.o\
 	rm -f userspace/bin/*.COPYING
 
