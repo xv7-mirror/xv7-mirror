@@ -189,6 +189,7 @@ UPROGS=\
 	userspace/bin/_zombie\
 	userspace/bin/_touch\
 	userspace/bin/_sleep\
+	userspace/bin/_uptime\
 
 # misc files
 FILES=\
