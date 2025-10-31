@@ -1,5 +1,5 @@
 /*
- * ls.c - lsprogram for xv7
+ * ls.c - ls program for xv7
  * Copyright (c) 2025 Vladislav Prokopenko
  *
  */
