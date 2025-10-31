@@ -121,7 +121,7 @@ opentest(void)
   int fd;
 
   printf(stdout, "open test\n");
-  fd = open("echo", 0);
+  fd = open("/bin/echo", 0);
   if(fd < 0){
     printf(stdout, "open echo failed!\n");
     exit();
@@ -294,7 +294,7 @@ void
 exectest(void)
 {
   printf(stdout, "exec test\n");
-  if(exec("echo", echoargv) < 0){
+  if(exec("/bin/echo", echoargv) < 0){
     printf(stdout, "exec echo failed\n");
     exit();
   }
@@ -1623,7 +1623,7 @@ bigargtest(void)
       args[i] = "bigargs test: failed\n                                                                                                                                                                                                       ";
     args[MAXARG-1] = 0;
     printf(stdout, "bigarg test\n");
-    exec("echo", args);
+    exec("/bin/echo", args);
     printf(stdout, "bigarg test ok\n");
     fd = open("bigarg-ok", O_CREATE);
     close(fd);
@@ -1727,7 +1727,7 @@ uio()
 void argptest()
 {
   int fd;
-  fd = open("init", O_RDONLY);
+  fd = open("/bin/init", O_RDONLY);
   if (fd < 0) {
     printf(2, "open failed\n");
     exit();
