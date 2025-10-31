@@ -166,24 +166,22 @@ mkfs: tools/mkfs.c includes/kernel/fs.h
 .PRECIOUS: %.o
 
 UPROGS=\
-	userspace/_cat\
-	userspace/_echo\
-	userspace/_forktest\
-	userspace/_grep\
-	userspace/_init\
-	userspace/_kill\
-	userspace/_ln\
-	userspace/_ls\
-	userspace/_mkdir\
-	userspace/_rm\
-	userspace/_sh\
-	userspace/_stressfs\
-	userspace/_usertests\
-	userspace/_wc\
-	userspace/_zombie\
-	userspace/_touch\
-	userspace/test/_hello\
-	userspace/test/test2/_helloworld\
+	userspace/bin/_cat\
+	userspace/bin/_echo\
+	userspace/bin/_forktest\
+	userspace/bin/_grep\
+	userspace/bin/_init\
+	userspace/bin/_kill\
+	userspace/bin/_ln\
+	userspace/bin/_ls\
+	userspace/bin/_mkdir\
+	userspace/bin/_rm\
+	userspace/bin/_sh\
+	userspace/bin/_stressfs\
+	userspace/bin/_usertests\
+	userspace/bin/_wc\
+	userspace/bin/_zombie\
+	userspace/bin/_touch\
 
 fs.img: mkfs $(UPROGS)
 	tools/mkfs fs.img $(UPROGS)
@@ -192,10 +190,10 @@ fs.img: mkfs $(UPROGS)
 
 clean: 
 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
-	kernel/*.o kernel/dev/*.o kernel/dev/char/*.o kernel/*.d kernel/dev/*.d kernel/dev/char/*.d userspace/*.o userspace/*.d *.d *.o kernel/*.asm userspace/*.asm *.asm kernel/*.sym userspace/*.sym *.sym ulib/*.o ulib/*.d kernel/vectors.S bootblock entryother \
+	kernel/*.o kernel/dev/*.o kernel/dev/char/*.o kernel/*.d kernel/dev/*.d kernel/dev/char/*.d userspace/bin/*.o userspace/bin/*.d *.d *.o kernel/*.asm userspace/bin/*.asm *.asm kernel/*.sym userspace/bin/*.sym *.sym ulib/*.o ulib/*.d kernel/vectors.S bootblock entryother \
 	initcode initcode.out xv7kernel xv7.img fs.img kernelmemfs \
 	xv7memfs.img tools/mkfs .gdbinit \
-	rm -f $(UPROGS_BASENAME)
+	rm -f $(UPROGS)
 
 # run in emulators
 
