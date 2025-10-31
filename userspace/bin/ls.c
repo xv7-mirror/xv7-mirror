@@ -1,85 +1,93 @@
+/*
+ * ls.c - lsprogram for xv7
+ * Copyright (c) 2025 Vladislav Prokopenko
+ *
+ */
 #include "types.h"
 #include "stat.h"
-#include "user.h"
 #include "fs.h"
-
-char*
-fmtname(char *path)
-{
-  static char buf[DIRSIZ+1];
-  char *p;
-
-  // Find first character after last slash.
-  for(p=path+strlen(path); p >= path && *p != '/'; p--)
-    ;
-  p++;
-
-  // Return blank-padded name.
-  if(strlen(p) >= DIRSIZ)
-    return p;
-  memmove(buf, p, strlen(p));
-  memset(buf+strlen(p), ' ', DIRSIZ-strlen(p));
-  return buf;
-}
+#include "user.h"
 
 void
-ls(char *path)
+ls (char *path)
 {
-  char buf[512], *p;
   int fd;
-  struct dirent de;
   struct stat st;
+  struct dirent de;
+  char buf[512], *p;
 
-  if((fd = open(path, 0)) < 0){
-    printf(2, "ls: cannot open %s\n", path);
-    return;
-  }
-
-  if(fstat(fd, &st) < 0){
-    printf(2, "ls: cannot stat %s\n", path);
-    close(fd);
-    return;
-  }
-
-  switch(st.type){
-  case T_FILE:
-    printf(1, "%s %d %d %d\n", fmtname(path), st.type, st.ino, st.size);
-    break;
-
-  case T_DIR:
-    if(strlen(path) + 1 + DIRSIZ + 1 > sizeof buf){
-      printf(1, "ls: path too long\n");
-      break;
+  if ((fd = open (path, 0)) < 0)
+    {
+      printf (2, "ls: %s does not exist\n", path);
+      return;
     }
-    strcpy(buf, path);
-    p = buf+strlen(buf);
-    *p++ = '/';
-    while(read(fd, &de, sizeof(de)) == sizeof(de)){
-      if(de.inum == 0)
+
+  if (fstat (fd, &st) < 0)
+    {
+      printf (2, "ls: could not stat %s\n", path);
+      close (fd);
+      return;
+    }
+
+  /*
+   * It's a single file
+   */
+  if (st.type == T_FILE)
+    {
+      /* Just print the name*/
+      char *name = path + strlen (path);
+      while (name > path && *(name - 1) != '/')
+        name--;
+      printf (1, "%s\n", name);
+      close (fd);
+      return;
+    }
+
+  /*
+   * It's a directory
+   */
+  while (read (fd, &de, sizeof (de)) == sizeof (de))
+    {
+      if (de.inum == 0)
         continue;
-      memmove(p, de.name, DIRSIZ);
+
+      /* Skip . and .. */
+      if (de.name[0] == '.'
+          && (de.name[1] == 0 || (de.name[1] == '.' && de.name[2] == 0)))
+        continue;
+
+      /* Build path for stat */
+      strcpy (buf, path);
+      p = buf + strlen (buf);
+      if (*(p - 1) != '/')
+        *p++ = '/';
+      memmove (p, de.name, DIRSIZ);
       p[DIRSIZ] = 0;
-      if(stat(buf, &st) < 0){
-        printf(1, "ls: cannot stat %s\n", buf);
-        continue;
-      }
-      printf(1, "%s %d %d %d\n", fmtname(buf), st.type, st.ino, st.size);
+
+      if (stat (buf, &st) < 0)
+        {
+          printf (2, "ls: cannot stat %s\n", buf);
+          continue;
+        }
+
+      /* Print / if it is a directory*/
+      printf (1, "%s%s ", de.name, st.type == T_DIR ? "/" : "");
     }
-    break;
-  }
-  close(fd);
+
+  close (fd);
 }
 
+/*
+ * Main program
+ */
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  int i;
-
-  if(argc < 2){
-    ls(".");
-    exit();
-  }
-  for(i=1; i<argc; i++)
-    ls(argv[i]);
-  exit();
+  if (argc < 2)
+    ls (".");
+  else
+    for (int i = 1; i < argc; i++)
+      ls (argv[i]);
+  printf(1, "\n");
+  exit ();
 }
