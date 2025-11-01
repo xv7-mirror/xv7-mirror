@@ -2,10 +2,11 @@
 #include "types.h"
 #include "user.h"
 
-int main(int argc, char *argv[]) {
-  int i;
+int main(int argc, char* argv[])
+{
+    int i;
 
-  for (i = 1; i < argc; i++)
-    printf("%s%s", argv[i], i + 1 < argc ? " " : "\n");
-  return 0;
+    for (i = 1; i < argc; i++)
+        printf("%s%s", argv[i], i + 1 < argc ? " " : "\n");
+    return 0;
 }

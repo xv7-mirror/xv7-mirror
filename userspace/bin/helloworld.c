@@ -6,7 +6,8 @@
 #include <string.h>
 #include <unistd.h>
 
-int main() { 
+int main()
+{
     printf("Hello from stdio\n");
     /*
      * What you would do on old xv6 is:

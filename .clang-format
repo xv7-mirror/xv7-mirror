@@ -1,0 +1,11 @@
+# .clang-format for xv7
+BasedOnStyle: Webkit
+UseTab: Never
+
+ColumnLimit: 80
+
+# Preserve the current include order.
+# Sorting them in other orders will cause
+# compile errors since the xv6 code is ancient.
+IncludeBlocks: Preserve
+SortIncludes: false

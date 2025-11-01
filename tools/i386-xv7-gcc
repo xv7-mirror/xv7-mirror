@@ -1,0 +1,9 @@
+# This is just a wrapper to point
+# gcc at userspace/ since there's
+# not much need for an actual gcc
+# yet
+#!/bin/sh
+SYSROOT=/full/path/to/xv7-sysroot
+
+exec i386-elf-gcc --sysroot="$SYSROOT" -I"$SYSROOT/include" -L"$SYSROOT/lib" \
+    -m32 -ffreestanding -fno-builtin -nostdinc -nostdlib "$@"

@@ -149,7 +149,7 @@ ULIB = ulib/crt0.o ulib/ulib.o ulib/usys.o ulib/printf.o ulib/umalloc.o
 #
 # Build static archive for libc
 #
-ULIB_OBJS = ulib/crt0.o ulib/ulib.o ulib/usys.o ulib/printf.o ulib/umalloc.o
+ULIB_OBJS = ulib/crt0.o ulib/ulib.o ulib/usys.o ulib/printf.o ulib/umalloc.o ulib/files.o
 
 copy-headers:
 	rm -rf userspace/include
@@ -208,6 +208,7 @@ UPROGS=\
 	userspace/bin/_uptime\
 	userspace/bin/_clear\
 	userspace/bin/_helloworld\
+	userspace/bin/_pwd\
 
 # misc files
 FILES=\
@@ -269,3 +270,12 @@ qemu-gdb: fs.img xv7.img .gdbinit
 qemu-nox-gdb: fs.img xv7.img .gdbinit
 	@echo "*** Now run 'gdb'." 1>&2
 	$(QEMU) -nographic $(QEMUOPTS) -S $(QEMUGDB)
+
+# Grab all .c files
+FSRC := $(shell find . -name '*.c' -o -name '*.h')
+
+# Format all code
+# this could take a bit of time
+format:
+	@clang-format -i $(FSRC)
+	@echo "Done"

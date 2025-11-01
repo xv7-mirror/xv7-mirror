@@ -6,11 +6,12 @@
 
 #include <unistd.h>
 
-int main(int argc, char *argv[]) {
-  /*
-   * IOCTL (console, IOCTL_CLEAR_SCREEN, 0)
-   */
-  ioctl(1, 1, 0);
+int main(int argc, char* argv[])
+{
+    /*
+     * IOCTL (console, IOCTL_CLEAR_SCREEN, 0)
+     */
+    ioctl(1, 1, 0);
 
-  return 0;
+    return 0;
 }

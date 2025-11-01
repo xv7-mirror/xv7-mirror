@@ -2,14 +2,15 @@
 #include "types.h"
 #include "user.h"
 
-int main(int argc, char **argv) {
-  int i;
+int main(int argc, char** argv)
+{
+    int i;
 
-  if (argc < 2) {
-    printf("usage: kill pid...\n");
+    if (argc < 2) {
+        printf("usage: kill pid...\n");
+        return 0;
+    }
+    for (i = 1; i < argc; i++)
+        kill(atoi(argv[i]));
     return 0;
-  }
-  for (i = 1; i < argc; i++)
-    kill(atoi(argv[i]));
-  return 0;
 }
