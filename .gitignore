@@ -21,3 +21,5 @@ initcode
 initcode.out
 mkfs
 userspace/bin/*.COPYING
+userspace/lib/*
+userspace/include/*
