@@ -18,13 +18,13 @@ ls (char *path)
 
   if ((fd = open (path, 0)) < 0)
     {
-      printf (2, "ls: %s does not exist\n", path);
+      printf( "ls: %s does not exist\n", path);
       return;
     }
 
   if (fstat (fd, &st) < 0)
     {
-      printf (2, "ls: could not stat %s\n", path);
+      printf( "ls: could not stat %s\n", path);
       close (fd);
       return;
     }
@@ -38,7 +38,7 @@ ls (char *path)
       char *name = path + strlen (path);
       while (name > path && *(name - 1) != '/')
         name--;
-      printf (1, "%s\n", name);
+      printf( "%s\n", name);
       close (fd);
       return;
     }
@@ -66,12 +66,12 @@ ls (char *path)
 
       if (stat (buf, &st) < 0)
         {
-          printf (2, "ls: cannot stat %s\n", buf);
+          printf( "ls: cannot stat %s\n", buf);
           continue;
         }
 
       /* Print / if it is a directory*/
-      printf (1, "%s%s ", de.name, st.type == T_DIR ? "/" : "");
+      printf( "%s%s ", de.name, st.type == T_DIR ? "/" : "");
     }
 
   close (fd);
@@ -88,6 +88,6 @@ main (int argc, char *argv[])
   else
     for (int i = 1; i < argc; i++)
       ls (argv[i]);
-  printf(1, "\n");
+  printf( "\n");
   exit ();
 }

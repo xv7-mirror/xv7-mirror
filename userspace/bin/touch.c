@@ -15,7 +15,7 @@ main(int argc, char *argv[])
   int i;
 
   if(argc < 2){
-    printf(2, "Usage: touch files...\n");
+    printf( "Usage: touch files...\n");
     exit();
   }
 
@@ -23,7 +23,7 @@ main(int argc, char *argv[])
     int fd = open(argv[i], O_CREATE | O_RDWR);
 
     if(fd < 0){
-      printf(2, "touch: could not create %s\n", argv[i]);
+      printf( "touch: could not create %s\n", argv[i]);
     } else {
      close(fd);
     }

@@ -393,9 +393,9 @@ static void fill_banner(char **banner, char *string, int maxwidth)
 static void print_banner(char **banner)
 {
    int j = 0;
-   printf(1, "\n");
-   for(j=0; j<LETTER_HEIGHT; j++) printf(1, "%s\n", banner[j]);
-   printf(1, "\n");
+   printf( "\n");
+   for(j=0; j<LETTER_HEIGHT; j++) printf( "%s\n", banner[j]);
+   printf( "\n");
 }
 
 
@@ -408,8 +408,8 @@ static void print_banner(char **banner)
 
 static void usage(char *program)
 {
-   printf(1, "Usage: %s string\n\nThis is a classic-style banner program similar to Solaris or AIX.\n", program);
-   printf(1,
+   printf( "Usage: %s string\n\nThis is a classic-style banner program similar to Solaris or AIX.\n", program);
+   printf(
     "This program is free software; you can redistribute it and/or\n"
     "modify it under the terms of the GNU General Public License,\n"
     "Version 2, as published by the Free Software Foundation.\n\n"

@@ -10,7 +10,7 @@
 int
 main(int argc, char *argv[])
 {
-  printf(1, "%d\n", uptime());
+  printf( "%d\n", uptime());
 
   exit();
 }

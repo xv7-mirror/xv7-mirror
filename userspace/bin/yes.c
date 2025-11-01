@@ -7,9 +7,9 @@ main(int argc, char *argv[])
 {
 	if (argc > 1)
 		for (;;)
-            printf(1, argv[1]);
+            printf( argv[1]);
 	else
 		for (;;)
-            printf(1, "y");
+            printf( "y");
     exit();
 }

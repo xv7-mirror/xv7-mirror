@@ -101,7 +101,7 @@ runcmd (struct cmd *cmd)
           exec (buf, ecmd->argv);
         }
 
-      printf (2, "sh: %s does not exist\n", ecmd->argv[0]);
+      printf( "sh: %s does not exist\n", ecmd->argv[0]);
       break;
 
     case REDIR:
@@ -109,7 +109,7 @@ runcmd (struct cmd *cmd)
       close (rcmd->fd);
       if (open (rcmd->file, rcmd->mode) < 0)
         {
-          printf (2, "open %s failed\n", rcmd->file);
+          printf( "open %s failed\n", rcmd->file);
           exit ();
         }
       runcmd (rcmd->cmd);
@@ -161,7 +161,7 @@ runcmd (struct cmd *cmd)
 int
 getcmd (char *buf, int nbuf)
 {
-  printf (2, "# ");
+  printf( "# ");
   memset (buf, 0, nbuf);
   gets (buf, nbuf);
   if (buf[0] == 0) // EOF
@@ -193,7 +193,7 @@ main (void)
           // Chdir must be called by the parent, not the child.
           buf[strlen (buf) - 1] = 0; // chop \n
           if (chdir (buf + 3) < 0)
-            printf (2, "cannot cd %s\n", buf + 3);
+            printf( "cannot cd %s\n", buf + 3);
           continue;
         }
       if (fork1 () == 0)
@@ -206,7 +206,7 @@ main (void)
 void
 panic (char *s)
 {
-  printf (2, "%s\n", s);
+  printf( "%s\n", s);
   exit ();
 }
 
@@ -368,7 +368,7 @@ parsecmd (char *s)
   peek (&s, es, "");
   if (s != es)
     {
-      printf (2, "leftovers: %s\n", s);
+      printf( "leftovers: %s\n", s);
       panic ("syntax");
     }
   nulterminate (cmd);

@@ -35,13 +35,18 @@ printint(int fd, int xx, int base, int sgn)
     putc(fd, buf[i]);
 }
 
-// Print to the given fd. Only understands %d, %x, %p, %s.
+/*
+ * Print to console (always fd 0, 1, 2)
+ * Here we'll use fd 1, but you can change it
+ * to anything and not feel any impact whatsoever
+ */
 void
-printf(int fd, const char *fmt, ...)
+printf(const char *fmt, ...)
 {
   char *s;
   int c, i, state;
   uint *ap;
+  int fd=1; // console
 
   state = 0;
   ap = (uint*)(void*)&fmt + 1;
