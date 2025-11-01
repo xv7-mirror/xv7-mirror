@@ -290,6 +290,45 @@ consolewrite(struct inode *ip, char *buf, int n)
   return n;
 }
 
+/*
+ * Clear the console screen.
+ * We do this by directly writing to VGA memory (*crt),
+ * and moving cursor manually to the top left.
+ */
+void
+consolecls()
+{
+  int i;
+
+  acquire(&cons.lock);
+
+  for(i = 0; i < 25*80; i++)
+        crt[i] = ' ' | 0x0700;   /* Space with normal attribute (white on black) */
+    
+  /* Move cursor to start of the screen */
+  outb(CRTPORT, 14);
+  outb(CRTPORT+1, 0);
+  outb(CRTPORT, 15);
+  outb(CRTPORT+1, 0);
+
+  release(&cons.lock);
+}
+
+#define IOCTL_CLEAR_SCREEN 1
+
+int
+consoleioctl(struct inode *ip, int request, void *arg)
+{
+  switch(request){
+    case IOCTL_CLEAR_SCREEN:
+      consolecls();
+      return 0;
+    default:
+      return -1;
+  }
+  return 0;
+}
+
 void
 consoleinit(void)
 {
@@ -297,6 +336,7 @@ consoleinit(void)
 
   devsw[CONSOLE].write = consolewrite;
   devsw[CONSOLE].read = consoleread;
+  devsw[CONSOLE].ioctl = consoleioctl;
   cons.locking = 1;
 
   ioapicenable(IRQ_KBD, 0);

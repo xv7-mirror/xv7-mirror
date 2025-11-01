@@ -190,6 +190,7 @@ UPROGS=\
 	userspace/bin/_touch\
 	userspace/bin/_sleep\
 	userspace/bin/_uptime\
+	userspace/bin/_clear\
 
 # misc files
 FILES=\

@@ -441,3 +441,35 @@ sys_pipe(void)
   fd[1] = fd1;
   return 0;
 }
+
+int
+sys_ioctl(void)
+{
+  int fd, request;
+  void *arg;
+  struct file *f;
+
+  if(argint(0, &fd) < 0 || argint(1, &request) < 0 || argptr(2, (void*)&arg, sizeof(void*)) < 0)
+    return -1;
+
+  f = myproc()->ofile[fd];
+  if(f == 0)
+    return -1;
+
+  if(f->type != FD_INODE){
+    cprintf("ioctl: fd type not T_DEV\n");
+    return -1;
+  }
+
+  struct inode *ip = f->ip;
+  if(ip->type != T_DEV){
+    cprintf("ioctl: inode type not T_DEV\n");
+    return -1;
+  }
+
+  int major = ip->major;
+  if(major < 0 || major >= NDEV || !devsw[major].ioctl)
+    return -1;
+
+  return devsw[major].ioctl(ip, request, arg);
+}
