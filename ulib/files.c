@@ -3,6 +3,9 @@
 #include <string.h>
 #include <unistd.h>
 
+FILE __stdout_file = { .fd = 1 };
+FILE *stdout = &__stdout_file;
+
 FILE* fopen(const char* path, const char* mode)
 {
     int flags = 0;
@@ -49,5 +52,15 @@ int fwrite(void* ptr, int size, int nmemb, FILE* stream)
 int fclose(FILE* stream)
 {
     close(stream->fd);
+    return 0;
+}
+
+int fputs(const char *s, FILE* stream) {
+    if (!s || !stream) 
+        return -1;
+    size_t len = strlen(s);
+    int written = write(stream->fd, s, (int)len);
+    if (written < 0) 
+        return -1;
     return 0;
 }

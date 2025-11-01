@@ -1,41 +1,31 @@
-/*
- * sleep.c - sleep program for xv7
- * Copyright (c) 2025 Vladislav Prokopenko
- *
- */
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-#include "types.h"
-#include "user.h"
-
-int main(int argc, char* argv[])
+void usage()
 {
-    int ticks;
+    printf("Usage: sleep ticks");
+}
+
+int main(int argc, char **argv)
+{
+    int c, n;
+    char *s;
+
+    n = 0;
     if (argc < 2) {
-        printf("Usage: sleep ticks\n");
-        return 0;
+        usage();
+        return 1;
+    }
+    s = argv[1];
+    while ((c = *s++)) {
+        if (c < '0' || c > '9') {
+            printf("bad character\n");
+            return 1;
+        }
+        n = n * 10 + c - '0';
     }
 
-    ticks = atoi(argv[1]); /* Convert argv[1] to an integer */
-
-    if (ticks <= 0) {
-        /*
-         * atoi is known to get borked if the number is
-         * too large.
-         */
-        printf("invalid number of ticks: %d\n", ticks);
-        printf(
-            "atoi() gets borked on too large numbers so pick a better one\n");
-        return 0;
-    }
-
-    if (ticks > 10000) {
-        /* We don't want the user borking their system */
-        printf("this might be a bit too much\n");
-        return 0;
-    }
-
-    sleep(ticks);
-    printf("slept %d ticks\n", ticks);
-
+    sleep(n);
     return 0;
 }

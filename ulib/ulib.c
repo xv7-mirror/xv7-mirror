@@ -3,6 +3,7 @@
 #include "fcntl.h"
 #include "user.h"
 #include "x86.h"
+#include <stdarg.h>
 
 char* strcpy(char* s, const char* t)
 {
@@ -105,4 +106,109 @@ void strcat(char* dest, const char* src)
         *dest++ = *src++;
 
     *dest = '\0';
+}
+
+int scanf(const char* fmt, ...)
+{
+    va_list ap;
+
+    char buf[500];
+    char* input;
+    const char* f;
+    int items_assigned = 0;
+
+    va_start(ap, fmt);
+
+    if (gets(buf, 500) == 0) {
+        va_end(ap);
+        return -1;
+    }
+
+    input = buf;
+    f = fmt;
+
+    while (*f) {
+        if (*f == ' ' || *f == '\t' || *f == '\n') {
+            while (*input == ' ' || *input == '\t' || *input == '\n'
+                || *input == '\r')
+                input++;
+            f++;
+            continue;
+        }
+
+        if (*f != '%') {
+            if (*input == *f) {
+                input++;
+                f++;
+                continue;
+            }
+            break;
+        }
+
+        f++;
+
+        /*
+         * Handle format specifiers
+         */
+
+        if (*f == 's') {
+            char* dest = va_arg(ap, char*);
+            int len = 0;
+
+            while (*input == ' ' || *input == '\t' || *input == '\n'
+                || *input == '\r')
+                input++;
+
+            while (*input && *input != ' ' && *input != '\t' && *input != '\n'
+                && *input != '\r') {
+                *dest++ = *input++;
+                len++;
+            }
+            *dest = '\0';
+
+            if (len > 0)
+                items_assigned++;
+        } else if (*f == 'd') {
+            int* dest = va_arg(ap, int*);
+            char* token_start;
+            int sign = 1;
+
+            while (*input == ' ' || *input == '\t' || *input == '\n'
+                || *input == '\r')
+                input++;
+
+            token_start = input;
+
+            if (*input == '-') {
+                sign = -1;
+                input++;
+            } else if (*input == '+') {
+                input++;
+            }
+
+            if (*input >= '0' && *input <= '9') {
+                *dest = atoi(token_start);
+
+                while (*input >= '0' && *input <= '9')
+                    input++;
+
+                items_assigned++;
+            } else {
+                break;
+            }
+        } else {
+            break;
+        }
+
+        f++;
+    }
+
+    va_end(ap);
+
+    return items_assigned;
+}
+
+int putchar(int c) {
+    char ch = c;
+    return write(1, &ch, 1);
 }
