@@ -20,3 +20,4 @@ entryother
 initcode
 initcode.out
 mkfs
+userspace/bin/*.COPYING
