@@ -222,3 +222,13 @@ void log_write(struct buf* b)
     b->flags |= B_DIRTY; // prevent eviction
     release(&log.lock);
 }
+
+void log_sync()
+{
+    acquire(&log.lock);
+    if (log.committing)
+        sleep(&log, &log.lock);
+    if (log.lh.n > 0)
+        commit();
+    release(&log.lock);
+}

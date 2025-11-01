@@ -2,15 +2,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-void usage()
-{
-    printf("Usage: sleep ticks");
-}
+void usage() { printf("Usage: sleep ticks"); }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     int c, n;
-    char *s;
+    char* s;
 
     n = 0;
     if (argc < 2) {

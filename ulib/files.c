@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 FILE __stdout_file = { .fd = 1 };
-FILE *stdout = &__stdout_file;
+FILE* stdout = &__stdout_file;
 
 FILE* fopen(const char* path, const char* mode)
 {
@@ -55,12 +55,13 @@ int fclose(FILE* stream)
     return 0;
 }
 
-int fputs(const char *s, FILE* stream) {
-    if (!s || !stream) 
+int fputs(const char* s, FILE* stream)
+{
+    if (!s || !stream)
         return -1;
     size_t len = strlen(s);
     int written = write(stream->fd, s, (int)len);
-    if (written < 0) 
+    if (written < 0)
         return -1;
     return 0;
 }

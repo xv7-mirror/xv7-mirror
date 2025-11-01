@@ -208,7 +208,8 @@ int scanf(const char* fmt, ...)
     return items_assigned;
 }
 
-int putchar(int c) {
+int putchar(int c)
+{
     char ch = c;
     return write(1, &ch, 1);
 }

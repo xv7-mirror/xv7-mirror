@@ -570,3 +570,9 @@ int sys_getcwd(void)
     iput(ip);
     return 0;
 }
+
+int sys_sync(void)
+{
+    fssync();
+    return 0;
+}

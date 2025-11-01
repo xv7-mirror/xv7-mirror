@@ -133,3 +133,15 @@ void brelse(struct buf* b)
 
     release(&bcache.lock);
 }
+
+void bsync(void)
+{
+    struct buf* b;
+    acquire(&bcache.lock);
+    for (b = bcache.head.next; b != &bcache.head; b = b->next) {
+        if (b->refcnt == 0 && b->flags & B_DIRTY) {
+            bwrite(b);
+        }
+    }
+    release(&bcache.lock);
+}

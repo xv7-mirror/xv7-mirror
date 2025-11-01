@@ -4,7 +4,8 @@
 #include <stdarg.h>
 #include <unistd.h>
 
-void err(int eval, const char *fmt, ...) {
+void err(int eval, const char* fmt, ...)
+{
     va_list ap;
     va_start(ap, fmt);
     printf(fmt, ap);
@@ -13,7 +14,8 @@ void err(int eval, const char *fmt, ...) {
     exit();
 }
 
-void errx(int eval, const char *fmt, ...) {
+void errx(int eval, const char* fmt, ...)
+{
     va_list ap;
     va_start(ap, fmt);
     printf(fmt, ap);
@@ -22,7 +24,8 @@ void errx(int eval, const char *fmt, ...) {
     exit();
 }
 
-void warnx(const char *fmt, ...) {
+void warnx(const char* fmt, ...)
+{
     va_list ap;
     va_start(ap, fmt);
     printf(fmt, ap);

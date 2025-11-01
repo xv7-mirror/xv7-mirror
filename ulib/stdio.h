@@ -12,7 +12,7 @@ typedef struct {
 #define O_RDWR 0x002
 #define O_CREATE 0x200
 
-extern FILE *stdout;
+extern FILE* stdout;
 
 int printf(const char* fmt, ...);
 void fprintf(int fd, const char* fmt, ...);
@@ -23,6 +23,6 @@ FILE* fopen(const char* path, const char* mode);
 int fwrite(void* ptr, int size, int nmemb, FILE* stream);
 int fread(void* ptr, int size, int nmemb, FILE* stream);
 int fclose(FILE* stream);
-int fputs(const char *s, FILE *stream);
+int fputs(const char* s, FILE* stream);
 
 #endif

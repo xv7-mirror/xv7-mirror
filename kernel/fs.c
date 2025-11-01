@@ -631,3 +631,11 @@ struct inode* nameiparent(char* path, char* name)
 {
     return namex(path, 1, name);
 }
+
+void fssync()
+{
+    begin_op();
+    log_sync();
+    bsync();
+    end_op();
+}

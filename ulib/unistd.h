@@ -26,6 +26,7 @@ int sleep(int);
 int uptime(void);
 int getppid(void);
 int ioctl(int, int, void*);
+int sync();
 int putchar(int c);
 
 #endif

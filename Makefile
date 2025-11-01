@@ -209,6 +209,7 @@ UPROGS=\
 	userspace/bin/_clear\
 	userspace/bin/_helloworld\
 	userspace/bin/_pwd\
+	userspace/bin/_sync\
 
 # misc files
 FILES=\
