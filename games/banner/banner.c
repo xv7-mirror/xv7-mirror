@@ -437,15 +437,15 @@ int main(int argc, char *argv[])
    char *banner[LETTER_HEIGHT];
    char *string = NULL;
 
-   if(argc < 2) { usage(argv[0]); exit(); }
+   if(argc < 2) { usage(argv[0]); return 0; }
 
    if(strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)
-      { usage(argv[0]); exit(); }
+      { usage(argv[0]); return 0; }
 
    if(strcmp(argv[1], "--") == 0) { wordcount = argc > 2 ? argc - 2 : 0; wordlist = argc > 2 ? argv + 2 : NULL; }
    else { wordcount = argc > 1 ? argc - 1 : 0; wordlist = argc > 1 ? argv + 1 : NULL; }
 
-   if(wordcount < 1) { usage(argv[0]); exit(); }
+   if(wordcount < 1) { usage(argv[0]); return 0; }
 
    for(i=0; i<wordcount; i++)
    {
@@ -458,5 +458,5 @@ int main(int argc, char *argv[])
       free_banner(banner);
    }
 
-   exit();
+   return 0;
 }

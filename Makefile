@@ -74,9 +74,10 @@ endif
 CC = $(TOOLPREFIX)gcc
 AS = $(TOOLPREFIX)gas
 LD = $(TOOLPREFIX)ld
+AR = $(TOOLPREFIX)ar
 OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
-CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -fno-omit-frame-pointer -Iincludes/generic -Iincludes/kernel
+CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -fno-omit-frame-pointer -Iincludes/generic -Iincludes/kernel -Iulib/
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
 ASFLAGS = -m32 -gdwarf-2 -Wa,-divide -Iincludes/generic -Iincludes/kernel
 # FreeBSD ld wants ``elf_i386_fbsd''
@@ -143,10 +144,26 @@ tags: $(OBJS) entryother.S _init
 kernel/vectors.S: tools/vectors.sh
 	tools/vectors.sh > kernel/vectors.S
 
-ULIB = ulib/ulib.o ulib/usys.o ulib/printf.o ulib/umalloc.o
+ULIB = ulib/crt0.o ulib/ulib.o ulib/usys.o ulib/printf.o ulib/umalloc.o
+
+#
+# Build static archive for libc
+#
+ULIB_OBJS = ulib/crt0.o ulib/ulib.o ulib/usys.o ulib/printf.o ulib/umalloc.o
+
+copy-headers:
+	rm -rf userspace/include
+	mkdir userspace/include/
+	cp ulib/*.h userspace/include/
+
+userspace/lib/libc.a: $(ULIB_OBJS)
+	mkdir -p userspace/lib
+	$(AR) rcs userspace/lib/libc.a $(ULIB_OBJS)
+
+ULIB = userspace/lib/libc.a
 
 _%: %.o $(ULIB)
-	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
+	$(LD) $(LDFLAGS) -N -e _start -Ttext 0 -o $@ $^
 	$(OBJDUMP) -S $@ > $*.asm
 	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $*.sym
 
@@ -184,17 +201,18 @@ UPROGS=\
 	userspace/bin/_rm\
 	userspace/bin/_sh\
 	userspace/bin/_stressfs\
-	userspace/bin/_usertests\
 	userspace/bin/_wc\
 	userspace/bin/_zombie\
 	userspace/bin/_touch\
 	userspace/bin/_sleep\
 	userspace/bin/_uptime\
 	userspace/bin/_clear\
+	userspace/bin/_helloworld\
 
 # misc files
 FILES=\
-	userspace/etc/initlog.txt\
+	userspace/etc/README\
+	userspace/lib/libc.a
 
 UPROG_LICENSES=\
 	games/banner/banner.COPYING\
@@ -202,7 +220,7 @@ UPROG_LICENSES=\
 GAMES=\
 	games/banner/_banner\
 
-fs.img: mkfs $(UPROGS) $(GAMES)
+fs.img: mkfs $(UPROGS) $(GAMES) copy-headers
 	cp $(GAMES) userspace/bin/
 	cp $(UPROG_LICENSES) userspace/bin/
 	tools/mkfs fs.img userspace/bin/_* $(FILES) userspace/bin/*.COPYING
@@ -217,6 +235,7 @@ clean:
 	rm -f $(UPROGS) userspace/bin/_*
 	rm -f $(GAMES) games/banner/*.d games/banner/*.sym games/banner/*.asm games/banner/*.o\
 	rm -f userspace/bin/*.COPYING
+	rm -f userspace/lib/*.a userspace/include/*
 
 # run in emulators
 

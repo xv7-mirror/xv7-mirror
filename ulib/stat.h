@@ -1,3 +1,8 @@
+#ifndef _STAT_H_
+#define _STAT_H_
+
+#include <stddef.h>
+
 typedef unsigned int uint;
 
 #define T_DIR  1   // Directory
@@ -11,3 +16,5 @@ struct stat {
   short nlink; // Number of links to file
   uint size;   // Size of file in bytes
 };
+
+#endif

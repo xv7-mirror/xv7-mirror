@@ -4,31 +4,28 @@
  *
  */
 
-#include "types.h"
-#include "stat.h"
-#include "user.h"
 #include "fcntl.h"
+#include "stat.h"
+#include "types.h"
+#include "user.h"
 
-int
-main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   int i;
 
-  if(argc < 2){
-    printf( "Usage: touch files...\n");
-    exit();
+  if (argc < 2) {
+    printf("Usage: touch files...\n");
+    return 0;
   }
 
-  for(i = 1; i < argc; i++){
+  for (i = 1; i < argc; i++) {
     int fd = open(argv[i], O_CREATE | O_RDWR);
 
-    if(fd < 0){
-      printf( "touch: could not create %s\n", argv[i]);
+    if (fd < 0) {
+      printf("touch: could not create %s\n", argv[i]);
     } else {
-     close(fd);
+      close(fd);
     }
   }
 
-  exit();
+  return 0;
 }
-
