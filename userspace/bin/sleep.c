@@ -4,7 +4,7 @@
 
 void usage()
 {
-    printf("Usage: sleep ticks");
+    printf("Usage: sleep ticks\n");
 }
 
 int main(int argc, char **argv)
