@@ -199,6 +199,7 @@ UPROGS=\
 	userspace/bin/_clear\
 	userspace/bin/_pwd\
 	userspace/bin/_sync\
+	userspace/bin/_memtesting\
 
 # misc files
 FILES=\

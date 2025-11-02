@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "param.h"
 #include <unistd.h>
+#include <string.h>
 
 // Memory allocator by Kernighan and Ritchie,
 // The C programming Language, 2nd ed.  Section 8.7.
@@ -59,7 +60,7 @@ static Header* morecore(uint nu)
     return freep;
 }
 
-void* malloc(uint nbytes)
+void* malloc(size_t nbytes)
 {
     Header *p, *prevp;
     uint nunits;
@@ -85,4 +86,61 @@ void* malloc(uint nbytes)
             if ((p = morecore(nunits)) == 0)
                 return 0;
     }
+}
+
+void* calloc(size_t nmemb, size_t size)
+{
+    size_t total_size;
+    void* ptr;
+
+    if (nmemb == 0 || size == 0) {
+        return malloc(0);
+    }
+
+    total_size = nmemb * size;
+    if (size != 0 && total_size / size != nmemb) {
+        return 0;
+    }
+
+    ptr = malloc(total_size);
+    if (ptr == 0) {
+        return 0;
+    }
+
+    memset(ptr, 0, total_size);
+
+    return ptr;
+}
+
+void* realloc(void* ptr, size_t size)
+{
+    Header* hp;
+    size_t old_data_size;
+    void* new_ptr;
+    size_t copy_size;
+
+    if (ptr == 0) {
+        return malloc(size);
+    }
+
+    if (size == 0) {
+        free(ptr);
+        return 0;
+    }
+
+    hp = (Header*)ptr - 1;
+    old_data_size = (hp->s.size - 1) * sizeof(Header);
+
+    new_ptr = malloc(size);
+    if (new_ptr == 0) {
+        return 0;
+    }
+
+    copy_size = (old_data_size < size) ? old_data_size : size;
+
+    memmove(new_ptr, ptr, copy_size);
+
+    free(ptr);
+
+    return new_ptr;
 }
