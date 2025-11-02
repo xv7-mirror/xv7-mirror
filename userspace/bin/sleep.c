@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-void usage() { printf("Usage: sleep ticks"); }
+void usage()
+{
+    printf("Usage: sleep ticks\n");
+}
 
 int main(int argc, char** argv)
 {
