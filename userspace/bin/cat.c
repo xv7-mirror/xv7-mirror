@@ -1,6 +1,3 @@
-/*	$OpenBSD: cat.c,v 1.34 2022/02/09 01:58:57 cheloha Exp $	*/
-/*	$NetBSD: cat.c,v 1.11 1995/09/07 06:12:54 jtc Exp $	*/
-
 /*
  * Copyright (c) 1989, 1993
  *	The Regents of the University of California.  All rights reserved.
