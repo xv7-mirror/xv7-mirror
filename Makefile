@@ -79,7 +79,7 @@ OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
 CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -fno-omit-frame-pointer -Iincludes/generic -Iincludes/kernel -Iulib/
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
-ASFLAGS = -m32 -gdwarf-2 -Wa,-divide -Iincludes/generic -Iincludes/kernel
+ASFLAGS = -m32 -gdwarf-2 -Wa,-divide -Iincludes/generic -Iincludes/kernel -Iulib/
 # FreeBSD ld wants ``elf_i386_fbsd''
 LDFLAGS += -m $(shell $(LD) -V | grep elf_i386 2>/dev/null | head -n 1)
 
@@ -189,18 +189,6 @@ games/%: games/%.o $(ULIB)
 # http://www.gnu.org/software/make/manual/html_node/Chained-Rules.html
 .PRECIOUS: %.o
 
-UPROGS=\
-	userspace/bin/_yes\
-	userspace/bin/_cat\
-	userspace/bin/_echo\
-	userspace/bin/_init\
-	userspace/bin/_kill\
-	userspace/bin/_sh\
-	userspace/bin/_clear\
-	userspace/bin/_pwd\
-	userspace/bin/_sync\
-	userspace/bin/_memtesting\
-
 # misc files
 FILES=\
 	userspace/etc/README\
@@ -212,7 +200,9 @@ UPROG_LICENSES=\
 GAMES=\
 	games/banner/_banner
 
-fs.img: mkfs $(UPROGS) $(GAMES) copy-headers
+fs.img: mkfs $(GAMES) copy-headers
+	mkdir -p userspace/bin
+	$(MAKE) -C bin all
 	cp $(GAMES) userspace/bin/
 	cp $(UPROG_LICENSES) userspace/bin/
 	tools/mkfs fs.img userspace/bin/_* $(FILES) userspace/bin/*.COPYING 
@@ -224,10 +214,11 @@ clean:
 	kernel/*.o kernel/dev/*.o kernel/dev/char/*.o kernel/*.d kernel/dev/*.d kernel/dev/char/*.d userspace/bin/*.o userspace/bin/*.d *.d *.o kernel/*.asm userspace/bin/*.asm *.asm kernel/*.sym userspace/bin/*.sym *.sym ulib/*.o ulib/*.d kernel/vectors.S bootblock entryother \
 	initcode initcode.out xv7kernel xv7.img fs.img kernelmemfs \
 	xv7memfs.img tools/mkfs .gdbinit \
-	rm -f $(UPROGS) userspace/bin/_*
+	rm -f userspace/bin/_*
 	rm -f $(GAMES) games/banner/*.d games/banner/*.sym games/banner/*.asm games/banner/*.o\
 	rm -f userspace/bin/*.COPYING
 	rm -rf userspace/lib/*.a userspace/include/*
+	$(MAKE) -C bin clean
 
 # run in emulators
 
