@@ -576,3 +576,34 @@ int sys_sync(void)
     fssync();
     return 0;
 }
+
+int sys_fcntl(void)
+{
+    int fd;
+    int cmd;
+    int arg;
+
+    if (argint(0, &fd) < 0)
+        return -1;
+    if (argint(1, &cmd) < 0)
+        return -1;
+    if (argint(2, &arg) < 0)
+        arg = 0;
+
+    struct file* f = myproc()->ofile[fd];
+    if (!f)
+        return -1;
+
+    switch (cmd) {
+    case F_GETFL:
+        return f->readable && !f->writable ? O_RDONLY
+            : !f->readable && f->writable  ? O_WRONLY
+                                           : O_RDWR;
+    case F_SETFL:
+        if (arg & O_APPEND)
+            f->flags |= F_APPEND;
+        return 0;
+    default:
+        return -1; /* unsupported */
+    }
+}

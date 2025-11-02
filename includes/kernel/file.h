@@ -6,6 +6,7 @@ struct file {
     struct pipe* pipe;
     struct inode* ip;
     uint off;
+    int flags;
 };
 
 // in-memory copy of an inode

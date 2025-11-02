@@ -1,3 +1,6 @@
+#ifndef _FCNTL_H_
+#define _FCNTL_H_
+
 #define O_RDONLY 0x000
 #define O_WRONLY 0x001
 #define O_RDWR 0x002
@@ -9,3 +12,5 @@
 
 #define F_GETFL 3
 #define F_SETFL 4
+
+#endif

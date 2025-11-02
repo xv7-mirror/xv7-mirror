@@ -1,7 +1,8 @@
 #include "types.h"
 #include "stat.h"
 #include "fcntl.h"
-#include "user.h"
+#include <stdio.h>
+#include <unistd.h>
 #include "x86.h"
 #include <stdarg.h>
 

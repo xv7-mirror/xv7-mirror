@@ -122,11 +122,10 @@
  ****************/
 
 #include <stddef.h>
-#include "types.h"
-#include "stat.h"
-#include "user.h"
-#include "fcntl.h"
-#include "param.h"
+#include <stdio.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "letters.h"
 
@@ -523,10 +522,10 @@ static void fill_banner(char** banner, char* string, int maxwidth)
 static void print_banner(char** banner)
 {
     int j = 0;
-    printf("\n");
+    printf(stdout, "\n");
     for (j = 0; j < LETTER_HEIGHT; j++)
-        printf("%s\n", banner[j]);
-    printf("\n");
+        printf(stdout, "%s\n", banner[j]);
+    printf(stdout, "\n");
 }
 
 /******************
@@ -538,17 +537,19 @@ static void print_banner(char** banner)
 
 static void usage(char* program)
 {
-    printf("Usage: %s string\n\nThis is a classic-style banner program similar "
-           "to Solaris or AIX.\n",
+    printf(stdout,
+        "Usage: %s string\n\nThis is a classic-style banner program similar "
+        "to Solaris or AIX.\n",
         program);
-    printf("This program is free software; you can redistribute it and/or\n"
-           "modify it under the terms of the GNU General Public License,\n"
-           "Version 2, as published by the Free Software Foundation.\n\n"
-           "This program is distributed in the hope that it will be useful,\n"
-           "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-           "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
-           "Copies of the GNU General Public License are available from\n"
-           "the Free Software Foundation website, http://www.gnu.org/.\n");
+    printf(stdout,
+        "This program is free software; you can redistribute it and/or\n"
+        "modify it under the terms of the GNU General Public License,\n"
+        "Version 2, as published by the Free Software Foundation.\n\n"
+        "This program is distributed in the hope that it will be useful,\n"
+        "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+        "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
+        "Copies of the GNU General Public License are available from\n"
+        "the Free Software Foundation website, http://www.gnu.org/.\n");
 }
 
 /**************

@@ -1,33 +1,42 @@
-#include "types.h"
-#include "stat.h"
-#include "user.h"
+#include <stdio.h>
+#include <stdarg.h>
+#include <unistd.h>
 
-static void putc(int fd, char c) { write(fd, &c, 1); }
+void putc(FILE* stream, char c)
+{
+    if (!stream)
+        return;
 
-static void printint(int fd, int xx, int base, int sgn)
+    if (write(stream->fd, &c, 1) != 1) {
+        stream->flags |= FILE_ERR;
+    }
+}
+
+void printint(FILE* stream, int xx, int base, int sgn)
 {
     static char digits[] = "0123456789ABCDEF";
     char buf[16];
-    int i, neg;
-    uint x;
+    int i = 0;
+    int neg = 0;
+    unsigned int x;
 
-    neg = 0;
     if (sgn && xx < 0) {
         neg = 1;
-        x = -xx;
+        x = (unsigned int)(-xx);
     } else {
-        x = xx;
+        x = (unsigned int)xx;
     }
 
-    i = 0;
     do {
         buf[i++] = digits[x % base];
-    } while ((x /= base) != 0);
+        x /= base;
+    } while (x != 0);
+
     if (neg)
         buf[i++] = '-';
 
     while (--i >= 0)
-        putc(fd, buf[i]);
+        putc(stream, buf[i]);
 }
 
 /*
@@ -35,97 +44,59 @@ static void printint(int fd, int xx, int base, int sgn)
  * Here we'll use fd 1, but you can change it
  * to anything and not feel any impact whatsoever
  */
-void printf(const char* fmt, ...)
+void printf(FILE* stream, const char* fmt, ...)
 {
-    char* s;
-    int c, i, state;
-    uint* ap;
-    int fd = 1; // console
+    if (!stream)
+        return;
 
+    char* s;
+    int c, state;
+    va_list ap;
+
+    va_start(ap, fmt);
     state = 0;
-    ap = (uint*)(void*)&fmt + 1;
-    for (i = 0; fmt[i]; i++) {
-        c = fmt[i] & 0xff;
+
+    for (int i = 0; fmt[i]; i++) {
+        c = fmt[i] & 0xFF;
+
         if (state == 0) {
             if (c == '%') {
                 state = '%';
             } else {
-                putc(fd, c);
+                putc(stream, c); // FILE* instead of fd
             }
         } else if (state == '%') {
-            if (c == 'd') {
-                printint(fd, *ap, 10, 1);
-                ap++;
-            } else if (c == 'x' || c == 'p') {
-                printint(fd, *ap, 16, 0);
-                ap++;
-            } else if (c == 's') {
-                s = (char*)*ap;
-                ap++;
-                if (s == 0)
+            switch (c) {
+            case 'd':
+                printint(stream, va_arg(ap, int), 10, 1);
+                break;
+            case 'x':
+            case 'p':
+                printint(stream, va_arg(ap, int), 16, 0);
+                break;
+            case 's':
+                s = va_arg(ap, char*);
+                if (!s)
                     s = "(null)";
-                while (*s != 0) {
-                    putc(fd, *s);
-                    s++;
-                }
-            } else if (c == 'c') {
-                putc(fd, *ap);
-                ap++;
-            } else if (c == '%') {
-                putc(fd, c);
-            } else {
-                // Unknown % sequence.  Print it to draw attention.
-                putc(fd, '%');
-                putc(fd, c);
+                while (*s)
+                    putc(stream, *s++);
+                break;
+            case 'c':
+                putc(stream, va_arg(ap, int));
+                break;
+            case '%':
+                putc(stream, '%');
+                break;
+            default:
+                putc(stream, '%');
+                putc(stream, c);
+                break;
             }
             state = 0;
         }
     }
+
+    va_end(ap);
 }
 
-void fprintf(int fd, const char* fmt, ...)
-{
-    char* s;
-    int c, i, state;
-    uint* ap;
-
-    state = 0;
-    ap = (uint*)(void*)&fmt + 1;
-    for (i = 0; fmt[i]; i++) {
-        c = fmt[i] & 0xff;
-        if (state == 0) {
-            if (c == '%') {
-                state = '%';
-            } else {
-                putc(fd, c);
-            }
-        } else if (state == '%') {
-            if (c == 'd') {
-                printint(fd, *ap, 10, 1);
-                ap++;
-            } else if (c == 'x' || c == 'p') {
-                printint(fd, *ap, 16, 0);
-                ap++;
-            } else if (c == 's') {
-                s = (char*)*ap;
-                ap++;
-                if (s == 0)
-                    s = "(null)";
-                while (*s != 0) {
-                    putc(fd, *s);
-                    s++;
-                }
-            } else if (c == 'c') {
-                putc(fd, *ap);
-                ap++;
-            } else if (c == '%') {
-                putc(fd, c);
-            } else {
-                // Unknown % sequence.  Print it to draw attention.
-                putc(fd, '%');
-                putc(fd, c);
-            }
-            state = 0;
-        }
-    }
-}
+void puts(const char* str) { printf(stdout, str); }

@@ -102,6 +102,7 @@ extern int sys_getppid(void);
 extern int sys_ioctl(void);
 extern int sys_getcwd(void);
 extern int sys_sync(void);
+extern int sys_fcntl(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork] sys_fork,
@@ -129,6 +130,7 @@ static int (*syscalls[])(void) = {
     [SYS_ioctl] sys_ioctl,
     [SYS_getcwd] sys_getcwd,
     [SYS_sync] sys_sync,
+    [SYS_fcntl] sys_fcntl,
 };
 
 void syscall(void)

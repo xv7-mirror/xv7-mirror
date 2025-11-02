@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 void* malloc(size_t);
-void free(void);
+void free(void*);
 int atoi(const char*);
 
 #endif

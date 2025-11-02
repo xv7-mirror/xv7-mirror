@@ -1,13 +1,15 @@
 #include "stat.h"
 #include "types.h"
-#include "user.h"
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 int main(int argc, char** argv)
 {
     int i;
 
     if (argc < 2) {
-        printf("usage: kill pid...\n");
+        puts("Usage: kill pid...\n");
         return 0;
     }
     for (i = 1; i < argc; i++)

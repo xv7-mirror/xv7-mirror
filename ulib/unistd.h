@@ -29,4 +29,8 @@ int ioctl(int, int, void*);
 int sync();
 int putchar(int c);
 
+#define STDIN_FILENO 0
+#define STDOUT_FILENO 1
+#define STDERR_FILENO 2
+
 #endif

@@ -3,7 +3,8 @@
 #include "fcntl.h"
 #include "stat.h"
 #include "types.h"
-#include "user.h"
+#include <stdio.h>
+#include <unistd.h>
 
 char* argv[] = { "sh", 0 };
 
@@ -21,7 +22,7 @@ int main(void)
     }
 
     if (fd < 0) {
-        printf("init: cannot open console\n");
+        printf(stdout, "init: cannot open console\n");
         return 0;
     }
 
@@ -36,7 +37,7 @@ int main(void)
 
         if (pid == 0) {
             exec("/bin/sh", argv);
-            printf("init: exec /bin/sh failed\n");
+            printf(stdout, "init: exec /bin/sh failed\n");
             return 0;
         }
         while ((wpid = wait()) >= 0 && wpid != pid)

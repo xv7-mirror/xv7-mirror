@@ -24,3 +24,4 @@
 #define SYS_ioctl 23
 #define SYS_getcwd 24
 #define SYS_sync 25
+#define SYS_fcntl 26

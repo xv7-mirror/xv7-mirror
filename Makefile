@@ -149,12 +149,14 @@ ULIB = ulib/crt0.o ulib/ulib.o ulib/usys.o ulib/printf.o ulib/umalloc.o
 #
 # Build static archive for libc
 #
-ULIB_OBJS = ulib/crt0.o ulib/ulib.o ulib/usys.o ulib/printf.o ulib/umalloc.o ulib/files.o ulib/err.o
+ULIB_OBJS = ulib/crt0.o ulib/ulib.o ulib/usys.o ulib/printf.o ulib/umalloc.o ulib/files.o ulib/err.o ulib/dirent.o ulib/progname.o ulib/errno.o
 
 copy-headers:
 	rm -rf userspace/include
 	mkdir userspace/include/
+	mkdir userspace/include/sys/
 	cp ulib/*.h userspace/include/
+	cp ulib/sys/*.h userspace/include/sys/
 
 userspace/lib/libc.a: $(ULIB_OBJS)
 	mkdir -p userspace/lib
@@ -191,23 +193,10 @@ UPROGS=\
 	userspace/bin/_yes\
 	userspace/bin/_cat\
 	userspace/bin/_echo\
-	userspace/bin/_forktest\
-	userspace/bin/_grep\
 	userspace/bin/_init\
 	userspace/bin/_kill\
-	userspace/bin/_ln\
-	userspace/bin/_ls\
-	userspace/bin/_mkdir\
-	userspace/bin/_rm\
 	userspace/bin/_sh\
-	userspace/bin/_stressfs\
-	userspace/bin/_wc\
-	userspace/bin/_zombie\
-	userspace/bin/_touch\
-	userspace/bin/_sleep\
-	userspace/bin/_uptime\
 	userspace/bin/_clear\
-	userspace/bin/_helloworld\
 	userspace/bin/_pwd\
 	userspace/bin/_sync\
 
@@ -220,12 +209,12 @@ UPROG_LICENSES=\
 	games/banner/banner.COPYING\
 
 GAMES=\
-	games/banner/_banner\
+	games/banner/_banner
 
 fs.img: mkfs $(UPROGS) $(GAMES) copy-headers
 	cp $(GAMES) userspace/bin/
 	cp $(UPROG_LICENSES) userspace/bin/
-	tools/mkfs fs.img userspace/bin/_* $(FILES) userspace/bin/*.COPYING
+	tools/mkfs fs.img userspace/bin/_* $(FILES) userspace/bin/*.COPYING 
 
 -include *.d
 
@@ -237,7 +226,7 @@ clean:
 	rm -f $(UPROGS) userspace/bin/_*
 	rm -f $(GAMES) games/banner/*.d games/banner/*.sym games/banner/*.asm games/banner/*.o\
 	rm -f userspace/bin/*.COPYING
-	rm -f userspace/lib/*.a userspace/include/*
+	rm -rf userspace/lib/*.a userspace/include/*
 
 # run in emulators
 

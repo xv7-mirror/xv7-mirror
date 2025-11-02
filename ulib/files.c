@@ -2,9 +2,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdarg.h>
 
 FILE __stdout_file = { .fd = 1 };
 FILE* stdout = &__stdout_file;
+
+FILE __stdin_file = { .fd = 1 };
+FILE* stdin = &__stdin_file;
+
+FILE __stderr_file = { .fd = 1 };
+FILE* stderr = &__stderr_file;
+
+int optind = 1;
+char* optarg;
 
 FILE* fopen(const char* path, const char* mode)
 {
@@ -64,4 +74,137 @@ int fputs(const char* s, FILE* stream)
     if (written < 0)
         return -1;
     return 0;
+}
+
+int ferror(FILE* stream)
+{
+    /*
+     * Treat null as an error.
+     */
+    if (!stream)
+        return 1;
+
+    return (stream->flags & FILE_ERR) != 0;
+}
+
+void clearerr(FILE* stream)
+{
+    if (stream)
+        stream->flags &= ~(FILE_ERR | FILE_EOF);
+}
+
+int fileno(FILE* stream)
+{
+    if (!stream)
+        return -1;
+    return stream->fd;
+}
+
+int setvbuf(FILE* stream, char* buf, int mode, int size)
+{
+    /*
+     * Don't do anything. We don't need that
+     * yet
+     */
+    return 0;
+}
+
+int getopt(int argc, char* argv[], const char* optstring)
+{
+    static int charpos = 1;
+    if (optind >= argc)
+        return -1;
+    char* arg = argv[optind];
+
+    if (arg[0] != '-' || arg[1] == '\0')
+        return -1;
+    if (strcmp(arg, "--") == 0) {
+        optind++;
+        return -1;
+    }
+
+    char c = arg[charpos];
+    if (strchr(optstring, c) == NULL)
+        return '?';
+
+    charpos++;
+    if (arg[charpos] == '\0') {
+        charpos = 1;
+        optind++;
+    }
+    return c;
+}
+
+int getc(FILE* stream)
+{
+    if (!stream)
+        return 0;
+
+    if (stream->bufpos >= stream->buflen) {
+        int n = read(stream->fd, stream->buf, BUFSIZ);
+        if (n < 0) {
+            stream->flags |= FILE_ERR;
+            return -1;
+        } else if (n == 0) {
+            stream->flags |= FILE_EOF;
+            return -1;
+        }
+        stream->buflen = n;
+        stream->bufpos = 0;
+    }
+
+    return (unsigned char)stream->buf[stream->bufpos++];
+}
+
+void fprintf(FILE* stream, const char* fmt, ...)
+{
+    char* s;
+    int c, state;
+    va_list ap;
+    va_start(ap, fmt);
+    state = 0;
+    if (!stream)
+        return;
+
+    for (int i = 0; fmt[i]; i++) {
+        c = fmt[i] & 0xFF;
+
+        if (state == 0) {
+            if (c == '%') {
+                state = '%';
+            } else {
+                putc(stream, c);
+            }
+        } else if (state == '%') {
+            switch (c) {
+            case 'd':
+                printint(stream, va_arg(ap, int), 10, 1);
+                break;
+            case 'x':
+            case 'p':
+                printint(stream, va_arg(ap, int), 16, 0);
+                break;
+            case 's':
+                s = va_arg(ap, char*);
+                if (!s)
+                    s = "(null)";
+                while (*s)
+                    putc(stream, *s++);
+                break;
+            case 'c':
+                putc(stream, va_arg(ap, int));
+                break;
+            case '%':
+                putc(stream, '%');
+                break;
+            default:
+                putc(stream, '%');
+                putc(stream, c);
+                break;
+            }
+            state = 0;
+        }
+    }
+
+    va_end(ap);
 }

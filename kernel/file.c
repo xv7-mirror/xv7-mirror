@@ -9,6 +9,8 @@
 #include "spinlock.h"
 #include "sleeplock.h"
 #include "file.h"
+#include "fcntl.h"
+#include "stat.h"
 
 struct devsw devsw[NDEV];
 struct {
@@ -77,6 +79,7 @@ int filestat(struct file* f, struct stat* st)
 {
     if (f->type == FD_INODE) {
         ilock(f->ip);
+        st->st_blksize = BSIZE;
         stati(f->ip, st);
         iunlock(f->ip);
         return 0;
@@ -107,6 +110,10 @@ int fileread(struct file* f, char* addr, int n)
 int filewrite(struct file* f, char* addr, int n)
 {
     int r;
+
+    if (f->flags & F_APPEND) {
+        f->off = f->ip->size;
+    }
 
     if (f->writable == 0)
         return -1;

@@ -15,6 +15,9 @@ struct stat {
     uint ino; // Inode number
     short nlink; // Number of links to file
     uint size; // Size of file in bytes
+    uint st_blksize; // Block size for IO
 };
+
+int stat(const char* n, struct stat* st);
 
 #endif
