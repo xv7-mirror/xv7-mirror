@@ -111,8 +111,6 @@ kernelmemfs: $(MEMFSOBJS) kernel/entry.o entryother initcode kernel.ld fs.img
 kernel/vectors.S: tools/vectors.sh
 	tools/vectors.sh > kernel/vectors.S
 
-ULIB = ulib/crt0.o ulib/ulib.o ulib/usys.o ulib/printf.o ulib/umalloc.o
-
 #
 # Build static archive for libc
 #
