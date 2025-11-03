@@ -11,7 +11,7 @@ void err(int eval, const char* fmt, ...)
     printf(fmt, ap);
     va_end(ap);
     putchar('\n');
-    exit();
+    exit(0);
 }
 
 void errx(int eval, const char* fmt, ...)
@@ -21,7 +21,7 @@ void errx(int eval, const char* fmt, ...)
     printf(fmt, ap);
     va_end(ap);
     putchar('\n');
-    exit();
+    exit(0);
 }
 
 void warnx(const char* fmt, ...)

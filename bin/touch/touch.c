@@ -122,5 +122,5 @@ usage(void)
 	(void)fprintf(stderr,
 "usage: touch [-acm] [-r file]"
 " file ...\n");
-	exit();
+	exit(0);
 }
