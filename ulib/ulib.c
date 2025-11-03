@@ -215,13 +215,9 @@ int putchar(int c)
     return write(1, &ch, 1);
 }
 
-int
-isatty(int fd)
-{
-    return (fd >= 0 && fd <= 2);
-}
+int isatty(int fd) { return (fd >= 0 && fd <= 2); }
 
-int strcspn(const char *s, const char *reject)
+int strcspn(const char* s, const char* reject)
 {
     const char *p, *r;
     for (p = s; *p; p++) {
@@ -232,10 +228,10 @@ int strcspn(const char *s, const char *reject)
     return p - s;
 }
 
-int strlcat(char *dst, const char *src, size_t size)
+int strlcat(char* dst, const char* src, size_t size)
 {
-    const char *s = src;
-    char *d = dst;
+    const char* s = src;
+    char* d = dst;
     size_t n = size;
     size_t dlen;
 
@@ -259,24 +255,22 @@ int strlcat(char *dst, const char *src, size_t size)
     return dlen + (s - src);
 }
 
-void *
-memcpy(void *dst, const void *src, unsigned n)
+void* memcpy(void* dst, const void* src, unsigned n)
 {
-    char *d = dst;
-    const char *s = src;
+    char* d = dst;
+    const char* s = src;
     for (unsigned i = 0; i < n; i++)
         d[i] = s[i];
     return dst;
 }
 
-int
-snprintf(char *buf, int size, const char *fmt, ...)
+int snprintf(char* buf, int size, const char* fmt, ...)
 {
     int i = 0;
     va_list ap;
     va_start(ap, fmt);
 
-    for (const char *p = fmt; *p; p++) {
+    for (const char* p = fmt; *p; p++) {
         if (*p != '%') {
             if (i < size - 1)
                 buf[i++] = *p;
@@ -284,7 +278,8 @@ snprintf(char *buf, int size, const char *fmt, ...)
         }
 
         p++; /* skip % */
-        if (!*p) break;
+        if (!*p)
+            break;
 
         if (*p == 'd') {
             int val = va_arg(ap, int);
@@ -333,7 +328,7 @@ snprintf(char *buf, int size, const char *fmt, ...)
                     buf[i++] = numbuf[k];
 
         } else if (*p == 's') {
-            char *s = va_arg(ap, char *);
+            char* s = va_arg(ap, char*);
             while (*s && i < size - 1)
                 buf[i++] = *s++;
 
@@ -352,4 +347,3 @@ snprintf(char *buf, int size, const char *fmt, ...)
     va_end(ap);
     return i;
 }
-

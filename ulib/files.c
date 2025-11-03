@@ -15,6 +15,7 @@ FILE* stderr = &__stderr_file;
 
 int optind = 1;
 char* optarg;
+int optopt = 0;
 
 FILE* fopen(const char* path, const char* mode)
 {
@@ -87,12 +88,11 @@ int ferror(FILE* stream)
     return (stream->flags & FILE_ERR) != 0;
 }
 
-char* fgets(char *buf, int size, FILE* stream)
+char* fgets(char* buf, int size, FILE* stream)
 {
     int i;
 
-    for (i = 0; i < size - 1; i++)
-    {
+    for (i = 0; i < size - 1; i++) {
         char c;
         int n = read(stream->fd, &c, 1);
         if (n < 1)
@@ -129,28 +129,58 @@ int setvbuf(FILE* stream, char* buf, int mode, int size)
 
 int getopt(int argc, char* argv[], const char* optstring)
 {
-    static int charpos = 1;
+    static int pos = 1;
+
     if (optind >= argc)
         return -1;
+
     char* arg = argv[optind];
 
-    if (arg[0] != '-' || arg[1] == '\0')
-        return -1;
-    if (strcmp(arg, "--") == 0) {
-        optind++;
-        return -1;
+    if (pos == 1) {
+        if (arg[0] != '-' || arg[1] == '\0')
+            return -1;
+        if (strcmp(arg, "--") == 0) {
+            optind++;
+            return -1;
+        }
     }
 
-    char c = arg[charpos];
-    if (strchr(optstring, c) == NULL)
+    char c = arg[pos];
+    const char* decl = strchr(optstring, c);
+
+    if (decl == NULL) {
+        optopt = c;
+        if (arg[++pos] == '\0') {
+            pos = 1;
+            optind++;
+        }
         return '?';
-
-    charpos++;
-    if (arg[charpos] == '\0') {
-        charpos = 1;
-        optind++;
     }
-    return c;
+
+    if (decl[1] == ':') {
+        if (arg[pos + 1] != '\0') {
+            optarg = &arg[pos + 1];
+            pos = 1;
+            optind++;
+        } else if (optind + 1 < argc) {
+            optarg = argv[optind + 1];
+            pos = 1;
+            optind += 2;
+        } else {
+            optopt = c;
+            pos = 1;
+            optind++;
+            return '?';
+        }
+        return c;
+    } else {
+        optarg = 0;
+        if (arg[++pos] == '\0') {
+            pos = 1;
+            optind++;
+        }
+        return c;
+    }
 }
 
 int getc(FILE* stream)

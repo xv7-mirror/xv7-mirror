@@ -174,7 +174,8 @@ void iinit(int dev)
     }
 
     readsb(dev, &sb);
-    cprintf("sb: %d inodes, %d/%d blocks free\n", sb.ninodes, sb.nblocks, sb.size);
+    cprintf(
+        "sb: %d inodes, %d/%d blocks free\n", sb.ninodes, sb.nblocks, sb.size);
 }
 
 static struct inode* iget(uint dev, uint inum);

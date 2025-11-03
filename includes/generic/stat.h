@@ -1,3 +1,8 @@
+#ifndef _STAT_H_
+#define _STAT_H_
+
+#include <stddef.h>
+
 typedef unsigned int uint;
 
 #define T_DIR 1 // Directory
@@ -10,5 +15,9 @@ struct stat {
     uint ino; // Inode number
     short nlink; // Number of links to file
     uint size; // Size of file in bytes
-    int st_blksize;
+    uint st_blksize; // Block size for IO
 };
+
+int stat(const char* n, struct stat* st);
+
+#endif

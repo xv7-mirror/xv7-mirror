@@ -50,7 +50,7 @@ void printf(const char* fmt, ...)
     char* s;
     int c, state;
     va_list ap;
-    FILE *stream = stdout;
+    FILE* stream = stdout;
 
     va_start(ap, fmt);
     state = 0;
@@ -100,24 +100,27 @@ void printf(const char* fmt, ...)
 
 void puts(const char* str) { printf(str); }
 
-long
-strtonum(const char *numstr, long minval, long maxval, const char **errstr)
+long strtonum(const char* numstr, long minval, long maxval, const char** errstr)
 {
-    char *end;
+    char* end;
     long val = strtol(numstr, &end, 10);
 
     if (end == numstr || *end != '\0') {
-        if (errstr) *errstr = "invalid!";
+        if (errstr)
+            *errstr = "invalid!";
         return 0;
     }
     if (val < minval) {
-        if (errstr) *errstr = "too small!";
+        if (errstr)
+            *errstr = "too small!";
         return minval;
     }
     if (val > maxval) {
-        if (errstr) *errstr = "too large!";
+        if (errstr)
+            *errstr = "too large!";
         return maxval;
     }
-    if (errstr) *errstr = NULL;
+    if (errstr)
+        *errstr = NULL;
     return val;
 }

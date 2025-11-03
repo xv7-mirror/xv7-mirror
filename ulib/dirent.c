@@ -18,8 +18,7 @@ DIR* opendir(const char* path)
         return 0;
 
     DIR* d = (DIR*)malloc(sizeof(DIR));
-    if (!d)
-    {
+    if (!d) {
         close(fd);
         return 0;
     }
@@ -33,11 +32,12 @@ struct dirent* readdir(DIR* d)
     struct dirent* de = &d->de;
     int n;
 
-    while ((n = read(d->fd, (char*)de, sizeof(struct dirent))) == sizeof(struct dirent)) {
+    while ((n = read(d->fd, (char*)de, sizeof(struct dirent)))
+        == sizeof(struct dirent)) {
         if (de->inum == 0)
             continue;
 
-        de->name[DIRSIZ] = 0; 
+        de->name[DIRSIZ] = 0;
         return de;
     }
 }
