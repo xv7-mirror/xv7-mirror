@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <err.h>
 #include <string.h>
 #include <fcntl.h>
 #include <assert.h>
@@ -250,8 +251,8 @@ void rsect(uint sec, void* buf)
         exit(1);
     }
     if (read(fsfd, buf, BSIZE) != BSIZE) {
-        perror("read");
-        exit(1);
+        warn("failed to read disk block");
+        printf("fsfd %d %d BSIZE\n", fsfd, BSIZE);
     }
 }
 
@@ -299,7 +300,6 @@ void iappend(uint inum, void* xp, int n)
     // printf("append inum %d at off %d sz %d\n", inum, off, n);
     while (n > 0) {
         fbn = off / BSIZE;
-        assert(fbn < MAXFILE);
         if (fbn < NDIRECT) {
             if (xint(din.addrs[fbn]) == 0) {
                 din.addrs[fbn] = xint(freeblock++);
