@@ -189,7 +189,7 @@ qemu-nox-gdb: fs.img xv7.img .gdbinit
 	$(QEMU) -nographic $(QEMUOPTS) -S $(QEMUGDB)
 
 # Grab all .c files
-FSRC := $(shell find . -type d -wholename ulib/bsd/ -prune -o -name '*.c' -o -name '*.h' -print)
+FSRC := $(shell find . -type d -wholename ulib/bsd -prune -o -name '*.c' -o -name '*.h' -print)
 
 # Format all code
 # this could take a bit of time
