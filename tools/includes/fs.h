@@ -1,6 +1,9 @@
 // On-disk file system format.
 // Both the kernel and user programs use this header file.
 
+typedef unsigned int uint;
+typedef unsigned short ushort;
+
 #define ROOTINO 1 // root i-number
 #define BSIZE 512 // block size
 
@@ -20,9 +23,18 @@ struct superblock {
     uint bmapstart; // Block number of first free map block
 };
 
-#define NDIRECT 12
+#define NDIRECT 10
 #define NINDIRECT (BSIZE / sizeof(uint))
-#define MAXFILE (NDIRECT + NINDIRECT)
+#define NDINDIRECT (NINDIRECT * NINDIRECT)
+#define NTINDIRECT (NDINDIRECT * NINDIRECT)
+
+#define MAX_DIRECT_BLOCKS NDIRECT
+#define MAX_SIND_BLOCKS NINDIRECT
+#define MAX_DIND_BLOCKS NDINDIRECT
+#define MAX_TIND_BLOCKS NTINDIRECT
+
+#define MAXFILE                                                                \
+    (MAX_DIRECT_BLOCKS + MAX_SIND_BLOCKS + MAX_DIND_BLOCKS + MAX_TIND_BLOCKS)
 
 // On-disk inode structure
 struct dinode {
@@ -31,7 +43,7 @@ struct dinode {
     short minor; // Minor device number (T_DEV only)
     short nlink; // Number of links to inode in file system
     uint size; // Size of file (bytes)
-    uint addrs[NDIRECT + 1]; // Data block addresses
+    uint addrs[NDIRECT + 3]; // Data block addresses
 };
 
 // Inodes per block.

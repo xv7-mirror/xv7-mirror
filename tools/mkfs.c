@@ -292,39 +292,111 @@ void iappend(uint inum, void* xp, int n)
     uint fbn, off, n1;
     struct dinode din;
     char buf[BSIZE];
-    uint indirect[NINDIRECT];
+    uint lbuf[NINDIRECT];
     uint x;
 
     rinode(inum, &din);
-    off = xint(din.size);
-    // printf("append inum %d at off %d sz %d\n", inum, off, n);
+    off = din.size;
+
     while (n > 0) {
         fbn = off / BSIZE;
-        if (fbn < NDIRECT) {
-            if (xint(din.addrs[fbn]) == 0) {
-                din.addrs[fbn] = xint(freeblock++);
-            }
-            x = xint(din.addrs[fbn]);
-        } else {
-            if (xint(din.addrs[NDIRECT]) == 0) {
-                din.addrs[NDIRECT] = xint(freeblock++);
-            }
-            rsect(xint(din.addrs[NDIRECT]), (char*)indirect);
-            if (indirect[fbn - NDIRECT] == 0) {
-                indirect[fbn - NDIRECT] = xint(freeblock++);
-                wsect(xint(din.addrs[NDIRECT]), (char*)indirect);
-            }
-            x = xint(indirect[fbn - NDIRECT]);
+
+        if (fbn >= MAXFILE) {
+            fprintf(
+                stderr, "file is too large (fbn=%u, max=%lu)\n", fbn, MAXFILE);
+            exit(1);
         }
+
+        if (fbn < NDIRECT) {
+            if (din.addrs[fbn] == 0)
+                din.addrs[fbn] = freeblock++;
+            x = din.addrs[fbn];
+
+        } else if (fbn < NDIRECT + MAX_SIND_BLOCKS) {
+            uint sind_idx = fbn - NDIRECT;
+
+            if (din.addrs[NDIRECT] == 0)
+                din.addrs[NDIRECT] = freeblock++;
+
+            rsect(din.addrs[NDIRECT], (char*)lbuf);
+
+            if (lbuf[sind_idx] == 0) {
+                lbuf[sind_idx] = freeblock++;
+                wsect(din.addrs[NDIRECT], (char*)lbuf);
+            }
+            x = lbuf[sind_idx];
+
+        } else if (fbn < NDIRECT + MAX_SIND_BLOCKS + MAX_DIND_BLOCKS) {
+            uint fbn_rel = fbn - (NDIRECT + MAX_SIND_BLOCKS);
+            uint dind_idx = fbn_rel / NINDIRECT;
+            uint sind_idx = fbn_rel % NINDIRECT;
+
+            if (din.addrs[NDIRECT + 1] == 0)
+                din.addrs[NDIRECT + 1] = freeblock++;
+
+            rsect(din.addrs[NDIRECT + 1], (char*)lbuf);
+
+            uint l2_addr = lbuf[dind_idx];
+            if (l2_addr == 0) {
+                l2_addr = freeblock++;
+                lbuf[dind_idx] = l2_addr;
+                wsect(din.addrs[NDIRECT + 1], (char*)lbuf);
+            }
+
+            rsect(l2_addr, (char*)lbuf);
+
+            if (lbuf[sind_idx] == 0) {
+                lbuf[sind_idx] = freeblock++;
+                wsect(l2_addr, (char*)lbuf);
+            }
+            x = lbuf[sind_idx];
+
+        } else {
+            uint fbn_rel = fbn - (NDIRECT + MAX_SIND_BLOCKS + MAX_DIND_BLOCKS);
+            uint tind_idx = fbn_rel / NDINDIRECT;
+            uint dind_idx = (fbn_rel % NDINDIRECT) / NINDIRECT;
+            uint sind_idx = (fbn_rel % NDINDIRECT) % NINDIRECT;
+
+            if (din.addrs[NDIRECT + 2] == 0)
+                din.addrs[NDIRECT + 2] = freeblock++;
+
+            rsect(din.addrs[NDIRECT + 2], (char*)lbuf);
+
+            uint l2_addr = lbuf[tind_idx];
+            if (l2_addr == 0) {
+                l2_addr = freeblock++;
+                lbuf[tind_idx] = l2_addr;
+                wsect(din.addrs[NDIRECT + 2], (char*)lbuf);
+            }
+
+            rsect(l2_addr, (char*)lbuf);
+
+            uint l3_addr = lbuf[dind_idx];
+            if (l3_addr == 0) {
+                l3_addr = freeblock++;
+                lbuf[dind_idx] = l3_addr;
+                wsect(l2_addr, (char*)lbuf);
+            }
+
+            rsect(l3_addr, (char*)lbuf);
+
+            if (lbuf[sind_idx] == 0) {
+                lbuf[sind_idx] = freeblock++;
+                wsect(l3_addr, (char*)lbuf);
+            }
+            x = lbuf[sind_idx];
+        }
+
         n1 = min(n, (fbn + 1) * BSIZE - off);
         rsect(x, buf);
-        bcopy(p, buf + off - (fbn * BSIZE), n1);
+        memcpy(buf + off - fbn * BSIZE, p, n1);
         wsect(x, buf);
         n -= n1;
         off += n1;
         p += n1;
     }
-    din.size = xint(off);
+
+    din.size = off;
     winode(inum, &din);
 }
 

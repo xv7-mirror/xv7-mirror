@@ -131,7 +131,7 @@ userspace/lib/libc.a: $(ULIB_OBJS)
 
 ULIB = userspace/lib/libc.a
 
-mkfs: tools/mkfs.c includes/kernel/fs.h
+mkfs: tools/mkfs.c
 	gcc -Werror -Wall -Itools/includes -o tools/mkfs tools/mkfs.c
 
 # misc files
