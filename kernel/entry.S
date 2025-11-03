@@ -6,7 +6,7 @@
 # http://www.gnu.org/software/grub/manual/multiboot/multiboot.html
 #
 # Using GRUB 2, you can boot xv7 from a file stored in a
-# Linux file system by copying kernel or kernelmemfs to /boot
+# Linux file system by copying kernel to /boot
 # and then adding this menu entry:
 #
 # menuentry "xv7" {

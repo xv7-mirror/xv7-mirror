@@ -72,11 +72,6 @@ xv7.img: bootblock xv7kernel
 	dd if=bootblock of=xv7.img conv=notrunc
 	dd if=xv7kernel of=xv7.img seek=1 conv=notrunc
 
-xv7memfs.img: bootblock kernelmemfs
-	dd if=/dev/zero of=xv7memfs.img count=10000
-	dd if=bootblock of=xv7memfs.img conv=notrunc
-	dd if=kernelmemfs of=xv7memfs.img seek=1 conv=notrunc
-
 bootblock: bootldr/bootasm.S bootldr/bootmain.c
 	$(CC) $(CFLAGS) -fno-pic -O -nostdinc -Iincludes/generic -c bootldr/bootmain.c
 	$(CC) $(CFLAGS) -fno-pic -nostdinc -Iincludes/generic -c bootldr/bootasm.S
@@ -101,12 +96,6 @@ xv7kernel: $(OBJS) kernel/entry.o entryother initcode kernel.ld
 	$(LD) $(LDFLAGS) -T kernel.ld -o xv7kernel kernel/entry.o $(OBJS) -b binary initcode entryother
 	$(OBJDUMP) -S xv7kernel > kernel.asm
 	$(OBJDUMP) -t xv7kernel | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > kernel.sym
-
-MEMFSOBJS = $(filter-out kernel/dev/ide.o,$(OBJS)) kernel/dev/memide.o
-kernelmemfs: $(MEMFSOBJS) kernel/entry.o entryother initcode kernel.ld fs.img
-	$(LD) $(LDFLAGS) -T kernel.ld -o kernelmemfs kernel/entry.o  $(MEMFSOBJS) -b binary initcode entryother fs.img
-	$(OBJDUMP) -S kernelmemfs > kernelmemfs.asm
-	$(OBJDUMP) -t kernelmemfs | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > kernelmemfs.sym
 
 kernel/vectors.S: tools/vectors.sh
 	tools/vectors.sh > kernel/vectors.S
@@ -149,8 +138,7 @@ fs.img: $(ULIB) mkfs copy-headers
 clean: 
 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
 	kernel/*.o kernel/dev/*.o kernel/dev/char/*.o kernel/*.d kernel/dev/*.d kernel/dev/char/*.d *.d *.o kernel/*.asm *.asm kernel/*.sym *.sym ulib/*.o ulib/*.d kernel/vectors.S bootblock entryother \
-	initcode initcode.out xv7kernel xv7.img fs.img kernelmemfs \
-	xv7memfs.img tools/mkfs .gdbinit \
+	initcode initcode.out xv7kernel xv7.img fs.img tools/mkfs .gdbinit \
 	rm -rf userspace/bin userspace/lib userspace/include
 	$(MAKE) -C bin clean
 	$(MAKE) -C games clean
@@ -170,9 +158,6 @@ QEMUOPTS = -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv7.img,
 
 qemu: fs.img xv7.img
 	$(QEMU) -serial mon:stdio $(QEMUOPTS)
-
-qemu-memfs: xv7memfs.img
-	$(QEMU) -drive file=xv7memfs.img,index=0,media=disk,format=raw -smp $(CPUS) -m 256
 
 qemu-nox: fs.img xv7.img
 	$(QEMU) -nographic $(QEMUOPTS)

@@ -3,10 +3,8 @@
 *.sym
 *.o
 _*
-kernelmemfs
 xv7kernel
 xv7.img
-xv7memfs.img
 vectors.S
 bootblock
 fs.img
