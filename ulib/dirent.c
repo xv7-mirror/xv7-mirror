@@ -1,5 +1,5 @@
-#include "types.h"
-#include "stat.h"
+#include <sys/stat.h>
+#include <stdio.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -31,26 +31,15 @@ DIR* opendir(const char* path)
 struct dirent* readdir(DIR* d)
 {
     struct dirent* de = &d->de;
-    int n = read(d->fd, (char*)de, sizeof(struct dirent));
-    
-    if (n != sizeof(struct dirent)) {
-        return 0; 
-    }
+    int n;
 
-    if (de->inum == 0) {
-        do {
-            if (de->inum != 0) {
-                return de;
-            }
+    while ((n = read(d->fd, (char*)de, sizeof(struct dirent))) == sizeof(struct dirent)) {
+        if (de->inum == 0)
+            continue;
 
-            n = read(d->fd, (char*)de, sizeof(struct dirent));
-            if (n != sizeof(struct dirent)) {
-                return 0;
-            }
-        } while (1);
+        de->name[DIRSIZ] = 0; 
+        return de;
     }
-    
-    return de;
 }
 
 int closedir(DIR* d)
