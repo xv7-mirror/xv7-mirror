@@ -258,3 +258,98 @@ int strlcat(char *dst, const char *src, size_t size)
 
     return dlen + (s - src);
 }
+
+void *
+memcpy(void *dst, const void *src, unsigned n)
+{
+    char *d = dst;
+    const char *s = src;
+    for (unsigned i = 0; i < n; i++)
+        d[i] = s[i];
+    return dst;
+}
+
+int
+snprintf(char *buf, int size, const char *fmt, ...)
+{
+    int i = 0;
+    va_list ap;
+    va_start(ap, fmt);
+
+    for (const char *p = fmt; *p; p++) {
+        if (*p != '%') {
+            if (i < size - 1)
+                buf[i++] = *p;
+            continue;
+        }
+
+        p++; /* skip % */
+        if (!*p) break;
+
+        if (*p == 'd') {
+            int val = va_arg(ap, int);
+            char numbuf[16];
+            int j = 0;
+            int neg = 0;
+
+            if (val < 0) {
+                neg = 1;
+                val = -val;
+            }
+
+            if (val == 0) {
+                numbuf[j++] = '0';
+            } else {
+                while (val > 0) {
+                    numbuf[j++] = '0' + (val % 10);
+                    val /= 10;
+                }
+            }
+
+            if (neg)
+                numbuf[j++] = '-';
+
+            for (int k = j - 1; k >= 0; k--)
+                if (i < size - 1)
+                    buf[i++] = numbuf[k];
+
+        } else if (*p == 'x') {
+            unsigned int val = va_arg(ap, unsigned int);
+            char numbuf[16];
+            int j = 0;
+
+            if (val == 0) {
+                numbuf[j++] = '0';
+            } else {
+                while (val > 0) {
+                    int digit = val & 0xF;
+                    numbuf[j++] = digit < 10 ? '0' + digit : 'a' + (digit - 10);
+                    val >>= 4;
+                }
+            }
+
+            for (int k = j - 1; k >= 0; k--)
+                if (i < size - 1)
+                    buf[i++] = numbuf[k];
+
+        } else if (*p == 's') {
+            char *s = va_arg(ap, char *);
+            while (*s && i < size - 1)
+                buf[i++] = *s++;
+
+        } else if (*p == 'c') {
+            char c = (char)va_arg(ap, int);
+            if (i < size - 1)
+                buf[i++] = c;
+
+        } else {
+            if (i < size - 1)
+                buf[i++] = *p;
+        }
+    }
+
+    buf[i] = '\0';
+    va_end(ap);
+    return i;
+}
+

@@ -49,6 +49,7 @@ void printint(FILE* stream, int xx, int base, int sgn);
 void setprogname(const char* name);
 const char* getprogname(void);
 void puts(const char* str);
+int snprintf(char* buf, int size, const char* fmt, ...);
 long strtonum(
     const char* numstr, long minval, long maxval, const char** errstr);
 char* fgets(char* buf, int size, FILE* stream);
