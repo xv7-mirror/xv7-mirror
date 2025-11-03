@@ -2,7 +2,7 @@
 #define _DIRENT_H_
 
 struct dirent {
-    uint ino;
+    unsigned short inum;
     char name[256];
 };
 

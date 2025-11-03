@@ -17,10 +17,12 @@ DIR* opendir(const char* path)
     if (fd < 0)
         return 0;
 
-    DIR* d = malloc(sizeof(DIR));
+    DIR* d = (DIR*)malloc(sizeof(DIR));
     if (!d)
+    {
+        close(fd);
         return 0;
-
+    }
     d->fd = fd;
     d->offset = 0;
     return d;
@@ -29,18 +31,25 @@ DIR* opendir(const char* path)
 struct dirent* readdir(DIR* d)
 {
     struct dirent* de = &d->de;
-    struct dirent buf;
+    int n = read(d->fd, (char*)de, sizeof(struct dirent));
+    
+    if (n != sizeof(struct dirent)) {
+        return 0; 
+    }
 
-    /*
-     * Read sizeof(dirent) bytes from current
-     * offset
-     */
-    int n = read(d->fd, (char*)&buf, sizeof(buf));
-    if (n != sizeof(buf))
-        return 0;
+    if (de->inum == 0) {
+        do {
+            if (de->inum != 0) {
+                return de;
+            }
 
-    d->offset += sizeof(buf);
-    *de = buf;
+            n = read(d->fd, (char*)de, sizeof(struct dirent));
+            if (n != sizeof(struct dirent)) {
+                return 0;
+            }
+        } while (1);
+    }
+    
     return de;
 }
 
@@ -48,7 +57,8 @@ int closedir(DIR* d)
 {
     if (!d)
         return -1;
-    close(d->fd);
+
+    int ret = close(d->fd);
     free(d);
-    return 0;
+    return (ret < 0) ? -1 : 0;
 }
