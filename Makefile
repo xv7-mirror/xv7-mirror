@@ -114,7 +114,8 @@ kernel/vectors.S: tools/vectors.sh
 #
 # Build static archive for libc
 #
-ULIB_OBJS = ulib/crt0.o ulib/ulib.o ulib/usys.o ulib/printf.o ulib/umalloc.o ulib/files.o ulib/err.o ulib/dirent.o ulib/progname.o ulib/errno.o
+ULIB_OBJS = ulib/crt0.o ulib/ulib.o ulib/usys.o ulib/printf.o ulib/umalloc.o ulib/files.o ulib/err.o ulib/dirent.o ulib/progname.o ulib/errno.o\
+			ulib/bsd/pledge.o ulib/bsd/strtol.o ulib/bsd/strlcpy.o
 
 copy-headers:
 	rm -rf userspace/include
@@ -143,7 +144,7 @@ fs.img: $(ULIB) mkfs copy-headers
 	mkdir userspace/bin
 	$(MAKE) -C bin all
 	$(MAKE) -C games all
-	tools/mkfs fs.img userspace/bin/_* $(FILES) userspace/bin/*.COPYING
+	tools/mkfs fs.img userspace/bin/_* $(FILES)
 
 clean: 
 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
@@ -188,7 +189,7 @@ qemu-nox-gdb: fs.img xv7.img .gdbinit
 	$(QEMU) -nographic $(QEMUOPTS) -S $(QEMUGDB)
 
 # Grab all .c files
-FSRC := $(shell find . -name '*.c' -o -name '*.h')
+FSRC := $(shell find . -type d -wholename ulib/bsd/ -prune -o -name '*.c' -o -name '*.h' -print)
 
 # Format all code
 # this could take a bit of time

@@ -2,6 +2,7 @@
 #define _STRING_H_
 
 #include <stddef.h>
+#include <stdint.h>
 
 typedef unsigned int uint;
 
@@ -12,5 +13,9 @@ int strcmp(const char*, const char*);
 uint strlen(const char*);
 void* memset(void*, int, uint);
 void strcat(char* dest, const char* src);
+int strlcat(char* dst, const char* src, size_t size);
+int strcspn(const char* s, const char* reject);
+long strtol(const char* nptr, char** endptr, int base);
+size_t strlcpy(char *dst, const char *src, size_t dsize);
 
 #endif

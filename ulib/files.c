@@ -87,6 +87,24 @@ int ferror(FILE* stream)
     return (stream->flags & FILE_ERR) != 0;
 }
 
+char* fgets(char *buf, int size, FILE* stream)
+{
+    int i;
+
+    for (i = 0; i < size - 1; i++)
+    {
+        char c;
+        int n = read(stream->fd, &c, 1);
+        if (n < 1)
+            break;
+        buf[i++] = c;
+        if (c == '\n')
+            break;
+    }
+    buf[i] = '\0';
+    return (i == 0) ? 0 : buf;
+}
+
 void clearerr(FILE* stream)
 {
     if (stream)

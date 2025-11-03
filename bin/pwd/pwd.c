@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
 {
     char buf[200];
     getcwd(buf, 200);
-    printf(stdout, "%s\n", buf);
+    printf("%s\n", buf);
 
     return 0;
 }

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <unistd.h>
+#include <string.h>
 
 void putc(FILE* stream, char c)
 {
@@ -44,14 +45,12 @@ void printint(FILE* stream, int xx, int base, int sgn)
  * Here we'll use fd 1, but you can change it
  * to anything and not feel any impact whatsoever
  */
-void printf(FILE* stream, const char* fmt, ...)
+void printf(const char* fmt, ...)
 {
-    if (!stream)
-        return;
-
     char* s;
     int c, state;
     va_list ap;
+    FILE *stream = stdout;
 
     va_start(ap, fmt);
     state = 0;
@@ -99,4 +98,26 @@ void printf(FILE* stream, const char* fmt, ...)
     va_end(ap);
 }
 
-void puts(const char* str) { printf(stdout, str); }
+void puts(const char* str) { printf(str); }
+
+long
+strtonum(const char *numstr, long minval, long maxval, const char **errstr)
+{
+    char *end;
+    long val = strtol(numstr, &end, 10);
+
+    if (end == numstr || *end != '\0') {
+        if (errstr) *errstr = "invalid!";
+        return 0;
+    }
+    if (val < minval) {
+        if (errstr) *errstr = "too small!";
+        return minval;
+    }
+    if (val > maxval) {
+        if (errstr) *errstr = "too large!";
+        return maxval;
+    }
+    if (errstr) *errstr = NULL;
+    return val;
+}

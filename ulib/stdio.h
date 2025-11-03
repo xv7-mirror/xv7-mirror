@@ -28,7 +28,7 @@ extern char* optarg;
 
 #define EOF (-1)
 
-void printf(FILE* stream, const char* fmt, ...);
+void printf(const char* fmt, ...);
 void fprintf(FILE* stream, const char* fmt, ...);
 char* gets(char*, int max);
 int getcwd(char* buf, int size);
@@ -49,5 +49,8 @@ void printint(FILE* stream, int xx, int base, int sgn);
 void setprogname(const char* name);
 const char* getprogname(void);
 void puts(const char* str);
+long strtonum(
+    const char* numstr, long minval, long maxval, const char** errstr);
+char* fgets(char* buf, int size, FILE* stream);
 
 #endif

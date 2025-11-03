@@ -6,10 +6,10 @@
 
 #define CHECK(condition, msg)                                                  \
     if (!(condition)) {                                                        \
-        printf(stdout, "  [FAILED] %s\n", msg);                                \
+        printf("  [FAILED] %s\n", msg);                                \
         return 0;                                                              \
     } else {                                                                   \
-        printf(stdout, "  [PASSED] %s\n", msg);                                \
+        printf("  [PASSED] %s\n", msg);                                \
     }
 
 void fill_mem(char* ptr, size_t size, char pattern)
@@ -31,7 +31,7 @@ int check_mem(char* ptr, size_t size, char pattern)
 
 int test_malloc_free()
 {
-    printf(stdout, "Testing malloc() and free()\n");
+    printf("Testing malloc() and free()\n");
     char* p1 = malloc(100);
     CHECK(p1 != NULL, "malloc(100) returned a non-NULL pointer.");
 
@@ -45,7 +45,7 @@ int test_malloc_free()
     CHECK(check_mem(p2, 200, 0xBB), "Wrote and verified pattern 0xBB in p2.");
 
     free(p1);
-    printf(stdout, "  free(p1) called.\n");
+    printf("  free(p1) called.\n");
 
     char* p3 = malloc(50);
     CHECK(p3 != NULL, "malloc(50) (reusing p1's block) returned non-NULL.");
@@ -58,15 +58,15 @@ int test_malloc_free()
 
     free(p2);
     free(p3);
-    printf(stdout, "  free(p2) and free(p3) called.\n");
+    printf("  free(p2) and free(p3) called.\n");
 
-    printf(stdout, "Passed malloc() and free() tests\n\n");
+    printf("Passed malloc() and free() tests\n\n");
     return 1;
 }
 
 int test_calloc()
 {
-    printf(stdout, "Testing calloc()\n");
+    printf("Testing calloc()\n");
     size_t count = 100;
     size_t elem_size = sizeof(int);
     int* p1 = calloc(count, elem_size);
@@ -82,15 +82,15 @@ int test_calloc()
     CHECK(is_zeroed, "Memory allocated by calloc is zero-initialized (0x00).");
 
     free(p1);
-    printf(stdout, "  free(p1) called.\n");
+    printf("  free(p1) called.\n");
 
-    printf(stdout, "Passed calloc() test\n\n");
+    printf("Passed calloc() test\n\n");
     return 1;
 }
 
 int test_realloc()
 {
-    printf(stdout, "Testing realloc()\n");
+    printf("Testing realloc()\n");
 
     char* r1 = realloc(NULL, 100);
     CHECK(r1 != NULL, "realloc(NULL, 100) (as malloc) returned non-NULL.");
@@ -120,7 +120,7 @@ int test_realloc()
     CHECK(r5 != NULL, "malloc(40) after realloc-free succeeded.");
     free(r5);
 
-    printf(stdout, "Passed realloc() test\n\n");
+    printf("Passed realloc() test\n\n");
     return 1;
 }
 
@@ -141,10 +141,10 @@ int main(int argc, char* argv[])
     }
 
     if (all_passed) {
-        printf(stdout, "Memory tests passed!\n");
+        printf("Memory tests passed!\n");
         return 0;
     } else {
-        printf(stdout, "Some tests have failed.\n");
+        printf("Some tests have failed.\n");
         return -1;
     }
 }

@@ -214,3 +214,47 @@ int putchar(int c)
     char ch = c;
     return write(1, &ch, 1);
 }
+
+int
+isatty(int fd)
+{
+    return (fd >= 0 && fd <= 2);
+}
+
+int strcspn(const char *s, const char *reject)
+{
+    const char *p, *r;
+    for (p = s; *p; p++) {
+        for (r = reject; *r; r++)
+            if (*p == *r)
+                return p - s;
+    }
+    return p - s;
+}
+
+int strlcat(char *dst, const char *src, size_t size)
+{
+    const char *s = src;
+    char *d = dst;
+    size_t n = size;
+    size_t dlen;
+
+    while (n-- != 0 && *d != '\0')
+        d++;
+    dlen = d - dst;
+    n = size - dlen;
+
+    if (n == 0)
+        return dlen + strlen(src);
+
+    while (*s != '\0') {
+        if (n != 1) {
+            *d++ = *s;
+            n--;
+        }
+        s++;
+    }
+    *d = '\0';
+
+    return dlen + (s - src);
+}
