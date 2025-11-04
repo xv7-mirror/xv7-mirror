@@ -2,7 +2,7 @@
 # between how it appears in directory listings like ls and the
 # Kate text editor and how it appears here.
 
-BINS := banner number pig
+BINS := banner number pig morse
 
 all:
 	for dir in $(BINS); do \

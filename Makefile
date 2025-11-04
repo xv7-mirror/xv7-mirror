@@ -104,7 +104,7 @@ kernel/vectors.S: tools/vectors.sh
 # Build static archive for libc
 #
 ULIB_OBJS = ulib/crt0.o ulib/ulib.o ulib/usys.o ulib/printf.o ulib/umalloc.o ulib/files.o ulib/err.o ulib/dirent.o ulib/progname.o ulib/errno.o\
-			ulib/bsd/pledge.o ulib/bsd/strtol.o ulib/bsd/strlcpy.o
+			ulib/uname.o ulib/bsd/pledge.o ulib/bsd/strtol.o ulib/bsd/strlcpy.o
 
 copy-headers:
 	rm -rf userspace/include

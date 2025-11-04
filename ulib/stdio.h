@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <fcntl.h>
+#include <sys/utsname.h>
 
 #define _IONBF 0 /* non-buffered mode */
 #define BUFSIZ 512
@@ -15,6 +16,8 @@ typedef struct {
     int buflen;
     int flags;
 } FILE;
+
+int uname(struct utsname *buf);
 
 #define FILE_ERR 0x1
 #define FILE_EOF 0x2
