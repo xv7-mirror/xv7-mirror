@@ -30,6 +30,15 @@ int sys_getpid(void) { return myproc()->pid; }
 
 int sys_getppid(void) { return myproc()->parent->pid; }
 
+int sys_kgetprogname()
+{
+    char* dst;
+    if (argptr(0, &dst, 16) < 0)
+        return -1;
+    safestrcpy(dst, myproc()->name, 16);
+    return 0;
+}
+
 int sys_sbrk(void)
 {
     int addr;

@@ -1,7 +1,10 @@
 #include <stdio.h>
+#include <unistd.h>
 
-const char* progname = "unknown";
+char progname[100];
 
-const char* getprogname(void) { return progname; }
-
-void setprogname(const char* name) { progname = name; }
+const char* getprogname(void)
+{
+    kgetprogname(progname);
+    return progname;
+}

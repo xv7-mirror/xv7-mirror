@@ -103,6 +103,7 @@ extern int sys_ioctl(void);
 extern int sys_getcwd(void);
 extern int sys_sync(void);
 extern int sys_fcntl(void);
+extern int sys_kgetprogname(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork] sys_fork,
@@ -131,6 +132,7 @@ static int (*syscalls[])(void) = {
     [SYS_getcwd] sys_getcwd,
     [SYS_sync] sys_sync,
     [SYS_fcntl] sys_fcntl,
+    [SYS_kgetprogname] sys_kgetprogname,
 };
 
 void syscall(void)

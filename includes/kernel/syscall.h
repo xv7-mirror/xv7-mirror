@@ -25,3 +25,4 @@
 #define SYS_getcwd 24
 #define SYS_sync 25
 #define SYS_fcntl 26
+#define SYS_kgetprogname 27

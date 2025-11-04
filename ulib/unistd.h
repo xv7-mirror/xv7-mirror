@@ -28,6 +28,7 @@ int getppid(void);
 int ioctl(int, int, void*);
 int sync();
 int putchar(int c);
+int kgetprogname(char* dst);
 
 int isatty(int fd);
 int pledge(const char* promises, const char* execpromises);
