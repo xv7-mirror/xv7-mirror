@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -127,60 +128,46 @@ int setvbuf(FILE* stream, char* buf, int mode, int size)
     return 0;
 }
 
-int getopt(int argc, char* argv[], const char* optstring)
+int getopt(int argc, char** argv, char* opts)
 {
-    static int pos = 1;
+    static int sp = 1;
+    register int c;
+    register char* cp;
 
-    if (optind >= argc)
-        return -1;
-
-    char* arg = argv[optind];
-
-    if (pos == 1) {
-        if (arg[0] != '-' || arg[1] == '\0')
+    if (sp == 1)
+        if (optind >= argc || argv[optind][0] != '-' || argv[optind][1] == '\0')
             return -1;
-        if (strcmp(arg, "--") == 0) {
+        else if (strcmp(argv[optind], "--") == NULL) {
             optind++;
             return -1;
         }
-    }
-
-    char c = arg[pos];
-    const char* decl = strchr(optstring, c);
-
-    if (decl == NULL) {
-        optopt = c;
-        if (arg[++pos] == '\0') {
-            pos = 1;
+    optopt = c = argv[optind][sp];
+    if (c == ':' || (cp = strchr(opts, c)) == NULL) {
+        printf("unknown option, -%c\n", c);
+        if (argv[optind][++sp] == '\0') {
             optind++;
+            sp = 1;
         }
-        return '?';
+        return ('?');
     }
-
-    if (decl[1] == ':') {
-        if (arg[pos + 1] != '\0') {
-            optarg = &arg[pos + 1];
-            pos = 1;
-            optind++;
-        } else if (optind + 1 < argc) {
-            optarg = argv[optind + 1];
-            pos = 1;
-            optind += 2;
-        } else {
-            optopt = c;
-            pos = 1;
-            optind++;
-            return '?';
-        }
-        return c;
+    if (*++cp == ':') {
+        if (argv[optind][sp + 1] != '\0')
+            optarg = &argv[optind++][sp + 1];
+        else if (++optind >= argc) {
+            printf("argument missing for -%c\n", c);
+            sp = 1;
+            return ('?');
+        } else
+            optarg = argv[optind++];
+        sp = 1;
     } else {
-        optarg = 0;
-        if (arg[++pos] == '\0') {
-            pos = 1;
+        if (argv[optind][++sp] == '\0') {
+            sp = 1;
             optind++;
         }
-        return c;
+        optarg = NULL;
     }
+    return c;
 }
 
 int getc(FILE* stream)

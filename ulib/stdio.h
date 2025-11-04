@@ -42,7 +42,7 @@ int fileno(FILE* stream);
 void clearerr(FILE* stream);
 int ferror(FILE* stream);
 int setvbuf(FILE* stream, char* buf, int mode, int size);
-int getopt(int argc, char* argv[], const char* optstring);
+int getopt(int argc, char** argv, char* opts);
 int getc(FILE* stream);
 void putc(FILE* stream, char c);
 void printint(FILE* stream, int xx, int base, int sgn);
