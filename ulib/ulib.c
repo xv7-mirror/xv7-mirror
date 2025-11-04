@@ -82,6 +82,16 @@ char* gets(char* buf, int max)
     return buf;
 }
 
+char getchar()
+{
+    unsigned char c;
+    if (read(0, &c, 1) == 1)
+        return c;
+    else
+        return -1;
+    return c;
+}
+
 int stat(const char* n, struct stat* st)
 {
     int fd;

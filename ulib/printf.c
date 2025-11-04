@@ -62,7 +62,7 @@ void printf(const char* fmt, ...)
             if (c == '%') {
                 state = '%';
             } else {
-                putc(stream, c); // FILE* instead of fd
+                putc(stream, c);
             }
         } else if (state == '%') {
             switch (c) {
@@ -83,6 +83,22 @@ void printf(const char* fmt, ...)
             case 'c':
                 putc(stream, va_arg(ap, int));
                 break;
+            case '.': {
+                int precision = 0;
+                if (fmt[i + 1] == '*') {
+                    i++; /* skip '*' */
+                    precision = va_arg(ap, int);
+                    if (fmt[i + 1] == 's') {
+                        i++; /* skip 's' */
+                        s = va_arg(ap, char*);
+                        if (!s)
+                            s = "(null)";
+                        for (int j = 0; j < precision && s[j]; j++)
+                            putc(stream, s[j]);
+                    }
+                }
+                break;
+            }
             case '%':
                 putc(stream, '%');
                 break;

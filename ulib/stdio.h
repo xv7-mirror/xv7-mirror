@@ -44,6 +44,7 @@ int ferror(FILE* stream);
 int setvbuf(FILE* stream, char* buf, int mode, int size);
 int getopt(int argc, char** argv, char* opts);
 int getc(FILE* stream);
+char getchar();
 void putc(FILE* stream, char c);
 void printint(FILE* stream, int xx, int base, int sgn);
 const char* getprogname(void);
