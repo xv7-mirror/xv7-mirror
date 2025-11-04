@@ -39,6 +39,15 @@ int sys_kgetprogname()
     return 0;
 }
 
+int sys_ksetprogname(void)
+{
+    char* src;
+    if (argstr(0, &src) < 0)
+        return -1;
+    safestrcpy(myproc()->name, src, 16);
+    return 0;
+}
+
 int sys_sbrk(void)
 {
     int addr;

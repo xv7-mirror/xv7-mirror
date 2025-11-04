@@ -26,3 +26,4 @@
 #define SYS_sync 25
 #define SYS_fcntl 26
 #define SYS_kgetprogname 27
+#define SYS_ksetprogname 28

@@ -46,8 +46,8 @@ int getopt(int argc, char* argv[], const char* optstring);
 int getc(FILE* stream);
 void putc(FILE* stream, char c);
 void printint(FILE* stream, int xx, int base, int sgn);
-void setprogname(const char* name);
 const char* getprogname(void);
+int setprogname(char* src);
 void puts(const char* str);
 int snprintf(char* buf, int size, const char* fmt, ...);
 long strtonum(
