@@ -2,6 +2,7 @@
 #define _UNISTD_H_
 
 #include <stddef.h>
+#include <sys/cdefs.h>
 
 int fork(void);
 int exit(int) __attribute__((noreturn));

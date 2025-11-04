@@ -17,6 +17,7 @@ int strlcat(char* dst, const char* src, size_t size);
 int strcspn(const char* s, const char* reject);
 long strtol(const char* nptr, char** endptr, int base);
 size_t strlcpy(char* dst, const char* src, size_t dsize);
-void* memcpy(void* restrict dest, const void* restrict src, int n);
+void* memcpy(void* dest, const void* src, unsigned n);
+char* strsep(char** s, const char* delim);
 
 #endif

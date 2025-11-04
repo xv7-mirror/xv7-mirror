@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include "x86.h"
 #include <stdarg.h>
+#include <string.h>
 
 char* strcpy(char* s, const char* t)
 {
@@ -30,6 +31,24 @@ uint strlen(const char* s)
     for (n = 0; s[n]; n++)
         ;
     return n;
+}
+
+char* strsep(char** s, const char* delim)
+{
+    char* start = *s;
+
+    char* p = start;
+    while (*p && !strchr(delim, *p))
+        p++;
+
+    if (*p) {
+        *p++ = '\0';
+        *s = p;
+    } else {
+        *s = NULL;
+    }
+
+    return start;
 }
 
 void* memset(void* dst, int c, uint n)

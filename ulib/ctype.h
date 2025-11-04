@@ -14,6 +14,8 @@ static inline int isdigit(int c) { return (c >= '0' && c <= '9'); }
 
 static inline int isalnum(int c) { return isalpha(c) || isdigit(c); }
 
+static inline int isblank(int c) { return (c == ' ' || c == '\t'); }
+
 static inline int isxdigit(int c)
 {
     return isdigit(c) || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f');

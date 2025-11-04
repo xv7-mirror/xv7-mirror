@@ -54,7 +54,7 @@ void raw_cat(int, const char*);
 int main(int argc, char* argv[])
 {
     int ch;
-
+    
     while ((ch = getopt(argc, argv, "benstuv")) != -1) {
         switch (ch) {
         case 'b':
