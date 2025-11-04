@@ -133,7 +133,7 @@ fs.img: $(ULIB) mkfs copy-headers
 	mkdir userspace/bin
 	$(MAKE) -C bin all
 	$(MAKE) -C games all
-	tools/mkfs fs.img userspace/bin/_* $(FILES)
+	tools/mkfs fs.img userspace/bin/_* userspace/include/* userspace/include/sys/* $(FILES)
 
 clean: 
 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
