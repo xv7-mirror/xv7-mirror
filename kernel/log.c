@@ -71,7 +71,7 @@ static void install_trans(void)
 
     for (tail = 0; tail < log.lh.n; tail++) {
         struct buf* lbuf
-            = bread(log.dev, log.start + tail + 1); // read log block
+        = bread(log.dev, log.start + tail + 1); // read log block
         struct buf* dbuf = bread(log.dev, log.lh.block[tail]); // read dst
         memmove(dbuf->data, lbuf->data, BSIZE); // copy block to dst
         bwrite(dbuf); // write dst to disk
@@ -205,12 +205,15 @@ static void commit()
 void log_write(struct buf* b)
 {
     int i;
+    int started_ephemeral = 0;
+
+    if (log.outstanding < 1) {
+        begin_op();
+        started_ephemeral = 1;
+    }
 
     if (log.lh.n >= LOGSIZE || log.lh.n >= log.size - 1)
         panic("too big a transaction");
-    if (log.outstanding < 1)
-        panic("log_write outside of trans");
-
     acquire(&log.lock);
     for (i = 0; i < log.lh.n; i++) {
         if (log.lh.block[i] == b->blockno) // log absorbtion
@@ -221,6 +224,10 @@ void log_write(struct buf* b)
         log.lh.n++;
     b->flags |= B_DIRTY; // prevent eviction
     release(&log.lock);
+
+    if (started_ephemeral) {
+        end_op();
+    }
 }
 
 void log_sync()
