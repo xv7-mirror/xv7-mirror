@@ -17,7 +17,7 @@ typedef struct {
     int flags;
 } FILE;
 
-int uname(struct utsname *buf);
+int uname(struct utsname* buf);
 
 #define FILE_ERR 0x1
 #define FILE_EOF 0x2

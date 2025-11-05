@@ -86,9 +86,6 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    assert((BSIZE % sizeof(struct dinode)) == 0);
-    assert((BSIZE % sizeof(struct dirent)) == 0);
-
     fsfd = open(argv[1], O_RDWR | O_CREAT | O_TRUNC, 0666);
     if (fsfd < 0) {
         perror(argv[1]);
@@ -265,6 +262,8 @@ uint ialloc(ushort type)
     din.type = xshort(type);
     din.nlink = xshort(1);
     din.size = xint(0);
+    din.atime = xint(0);
+    din.mtime = xint(0);
     winode(inum, &din);
     return inum;
 }

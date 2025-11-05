@@ -20,12 +20,24 @@
 #include "fs.h"
 #include "buf.h"
 #include "file.h"
+#include "x86.h"
+#include "date.h"
+#include "time.h"
+
+/*
+ * current rtc time and unix
+ * time to write onto inodes
+ */
+struct rtcdate fsdate;
+int curtime;
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 static void itrunc(struct inode*);
 // there should be one superblock per disk device, but we run with
 // only one device
 struct superblock sb;
+
+void fsupdtime() { curtime = unix_uptime(); }
 
 // Read the super block.
 void readsb(int dev, struct superblock* sb)
@@ -173,9 +185,12 @@ void iinit(int dev)
         initsleeplock(&icache.inode[i].lock, "inode");
     }
 
+    fsupdtime();
     readsb(dev, &sb);
-    cprintf(
-        "sb: %d inodes, %d/%d blocks free\n", sb.ninodes, sb.nblocks, sb.size);
+    // Update mount time
+    sb.mounttime = curtime;
+    cprintf("sb at %d: %d inodes %d/%d blocks free mounttime %d\n", dev,
+        sb.ninodes, sb.nblocks, sb.size, sb.mounttime);
 }
 
 static struct inode* iget(uint dev, uint inum);
@@ -188,6 +203,8 @@ struct inode* ialloc(uint dev, short type)
     int inum;
     struct buf* bp;
     struct dinode* dip;
+
+    fsupdtime();
 
     for (inum = 1; inum < sb.ninodes; inum++) {
         bp = bread(dev, IBLOCK(inum, sb));
@@ -220,6 +237,8 @@ void iupdate(struct inode* ip)
     dip->minor = ip->minor;
     dip->nlink = ip->nlink;
     dip->size = ip->size;
+    dip->atime = ip->atime;
+    dip->mtime = ip->mtime;
     memmove(dip->addrs, ip->addrs, sizeof(ip->addrs));
     log_write(bp);
     brelse(bp);
@@ -290,6 +309,8 @@ void ilock(struct inode* ip)
         ip->minor = dip->minor;
         ip->nlink = dip->nlink;
         ip->size = dip->size;
+        ip->mtime = dip->mtime;
+        ip->atime = dip->atime;
         memmove(ip->addrs, dip->addrs, sizeof(ip->addrs));
         brelse(bp);
         ip->valid = 1;
@@ -543,6 +564,8 @@ void stati(struct inode* ip, struct stat* st)
     st->type = ip->type;
     st->nlink = ip->nlink;
     st->size = ip->size;
+    st->mtime = ip->mtime;
+    st->atime = ip->atime;
 }
 
 // Read data from inode.
@@ -551,6 +574,10 @@ int readi(struct inode* ip, char* dst, uint off, uint n)
 {
     uint tot, m;
     struct buf* bp;
+
+    fsupdtime();
+    sb.modtime = curtime;
+    ip->atime = curtime;
 
     if (ip->type == T_DEV) {
         if (ip->major < 0 || ip->major >= NDEV || !devsw[ip->major].read)
@@ -578,6 +605,13 @@ int writei(struct inode* ip, char* src, uint off, uint n)
 {
     uint tot, m;
     struct buf* bp;
+
+    /*
+     * update time
+     */
+    fsupdtime();
+    sb.modtime = curtime;
+    ip->mtime = curtime;
 
     if (ip->type == T_DEV) {
         if (ip->major < 0 || ip->major >= NDEV || !devsw[ip->major].write)

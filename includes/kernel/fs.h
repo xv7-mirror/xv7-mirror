@@ -7,6 +7,8 @@ typedef unsigned short ushort;
 #define ROOTINO 1 // root i-number
 #define BSIZE 512 // block size
 
+// All timekeeping is in Unix format, and we change time regardless of the
+// operation being successful or not.
 // Disk layout:
 // [ boot block | super block | log | inode blocks |
 //                                          free bit map | data blocks]
@@ -21,6 +23,8 @@ struct superblock {
     uint logstart; // Block number of first log block
     uint inodestart; // Block number of first inode block
     uint bmapstart; // Block number of first free map block
+    int mounttime; // Mount time
+    int modtime; // Last time fs was modified
 };
 
 #define NDIRECT 10
@@ -44,6 +48,8 @@ struct dinode {
     short nlink; // Number of links to inode in file system
     uint size; // Size of file (bytes)
     uint addrs[NDIRECT + 3]; // Data block addresses
+    int atime;
+    int mtime;
 };
 
 // Inodes per block.

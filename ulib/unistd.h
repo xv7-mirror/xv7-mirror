@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <sys/cdefs.h>
 
+typedef int time_t;
+
 int fork(void);
 int exit(int) __attribute__((noreturn));
 int wait(void);
@@ -31,6 +33,7 @@ int sync();
 int putchar(int c);
 int kgetprogname(char* dst);
 int ksetprogname(char* src);
+time_t time(void);
 
 int isatty(int fd);
 int pledge(const char* promises, const char* execpromises);

@@ -27,6 +27,7 @@ OBJS = \
 	kernel/dev/char/uart.o\
 	kernel/vectors.o\
 	kernel/vm.o\
+	kernel/time.o\
 
 # By default, we should cross-compile to i386-elf.
 TOOLPREFIX = i386-elf-
@@ -55,6 +56,7 @@ OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
 CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -fno-omit-frame-pointer -Iincludes/generic -Iincludes/kernel -Iulib/
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
+UCFLAGS = -Iulib/ $(CFLAGS)
 ASFLAGS = -m32 -gdwarf-2 -Wa,-divide -Iincludes/generic -Iincludes/kernel -Iulib/
 # FreeBSD ld wants ``elf_i386_fbsd''
 LDFLAGS += -m $(shell $(LD) -V | grep elf_i386 2>/dev/null | head -n 1)
@@ -103,8 +105,11 @@ kernel/vectors.S: tools/vectors.sh
 #
 # Build static archive for libc
 #
-ULIB_OBJS = ulib/crt0.o ulib/ulib.o ulib/usys.o ulib/printf.o ulib/umalloc.o ulib/files.o ulib/err.o ulib/dirent.o ulib/progname.o ulib/errno.o\
+ULIB_OBJS = ulib/crt0.o ulib/ulib.o ulib/usys.o ulib/printf.o ulib/umalloc.o ulib/time.o ulib/files.o ulib/err.o ulib/dirent.o ulib/progname.o ulib/errno.o\
 			ulib/uname.o ulib/bsd/pledge.o ulib/bsd/strtol.o ulib/bsd/strlcpy.o
+
+ulib/%.o: ulib/%.c
+	$(CC) $(UCFLAGS) -c -o $@ $<
 
 copy-headers:
 	rm -rf userspace/include

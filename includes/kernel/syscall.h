@@ -27,3 +27,4 @@
 #define SYS_fcntl 26
 #define SYS_kgetprogname 27
 #define SYS_ksetprogname 28
+#define SYS_time 29

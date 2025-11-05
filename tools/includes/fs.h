@@ -21,6 +21,8 @@ struct superblock {
     uint logstart; // Block number of first log block
     uint inodestart; // Block number of first inode block
     uint bmapstart; // Block number of first free map block
+    int mounttime;
+    int modtime;
 };
 
 #define NDIRECT 10
@@ -44,6 +46,8 @@ struct dinode {
     short nlink; // Number of links to inode in file system
     uint size; // Size of file (bytes)
     uint addrs[NDIRECT + 3]; // Data block addresses
+    int atime;
+    int mtime;
 };
 
 // Inodes per block.

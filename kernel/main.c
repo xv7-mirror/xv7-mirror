@@ -5,11 +5,14 @@
 #include "mmu.h"
 #include "proc.h"
 #include "x86.h"
+#include "time.h"
 
 static void startothers(void);
 static void mpmain(void) __attribute__((noreturn));
 extern pde_t* kpgdir;
 extern char end[]; // first address after kernel loaded from ELF file
+
+int boottime = 0; // Uptime immediately after main() has finished
 
 // Bootstrap processor starts running C code here.
 // Allocate a real stack and switch to it, first
@@ -30,6 +33,8 @@ int main(void)
     binit(); // buffer cache
     fileinit(); // file table
     ideinit(); // disk
+    boottime = unix_uptime();
+    cprintf("boottime: %d\n", boottime);
     startothers(); // start other processors
     kinit2(P2V(4 * 1024 * 1024), P2V(PHYSTOP)); // must come after startothers()
     userinit(); // first user process
@@ -48,7 +53,7 @@ static void mpenter(void)
 // Common CPU setup code.
 static void mpmain(void)
 {
-    cprintf("cpu%d: starting %d\n", cpuid(), cpuid());
+    cprintf("cpu at %d: lapicid %d\n", cpuid(), mycpu()->apicid);
     idtinit(); // load idt register
     xchg(&(mycpu()->started), 1); // tell startothers() we're up
     scheduler(); // start running processes

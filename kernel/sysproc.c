@@ -6,6 +6,10 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "time.h"
+
+typedef int time_t;
+extern int boottime;
 
 int sys_fork(void) { return fork(); }
 
@@ -38,6 +42,8 @@ int sys_kgetprogname()
     safestrcpy(dst, myproc()->name, 16);
     return 0;
 }
+
+time_t sys_time(void) { return unix_uptime(); }
 
 int sys_ksetprogname(void)
 {
@@ -81,14 +87,8 @@ int sys_sleep(void)
     return 0;
 }
 
-// return how many clock tick interrupts have occurred
-// since start.
-int sys_uptime(void)
+time_t sys_uptime(void)
 {
-    uint xticks;
-
-    acquire(&tickslock);
-    xticks = ticks;
-    release(&tickslock);
-    return xticks;
+    int ucurtime = unix_uptime();
+    return ucurtime - boottime;
 }

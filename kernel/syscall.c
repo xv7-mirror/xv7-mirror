@@ -6,6 +6,9 @@
 #include "proc.h"
 #include "x86.h"
 #include "syscall.h"
+#include "time.h"
+
+typedef int time_t;
 
 // User code makes a system call with INT T_SYSCALL.
 // System call number in %eax.
@@ -105,6 +108,7 @@ extern int sys_sync(void);
 extern int sys_fcntl(void);
 extern int sys_kgetprogname(void);
 extern int sys_ksetprogname(void);
+extern time_t sys_time(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork] sys_fork,
@@ -135,6 +139,7 @@ static int (*syscalls[])(void) = {
     [SYS_fcntl] sys_fcntl,
     [SYS_kgetprogname] sys_kgetprogname,
     [SYS_ksetprogname] sys_ksetprogname,
+    [SYS_time] sys_time,
 };
 
 void syscall(void)
