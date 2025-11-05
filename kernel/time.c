@@ -11,7 +11,6 @@
 #include "traps.h"
 #include "mmu.h"
 #include "x86.h"
-#include "date.h"
 #include "time.h"
 
 /*
