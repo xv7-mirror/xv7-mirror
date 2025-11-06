@@ -53,7 +53,7 @@ static void mpenter(void)
 // Common CPU setup code.
 static void mpmain(void)
 {
-    cprintf("cpu at %d: lapicid %d\n", cpuid(), mycpu()->apicid);
+    cprintf("cpu at %d: apicid %d\n", cpuid(), mycpu()->apicid);
     idtinit(); // load idt register
     xchg(&(mycpu()->started), 1); // tell startothers() we're up
     scheduler(); // start running processes
