@@ -14,6 +14,7 @@
 #include "mmu.h"
 #include "proc.h"
 #include "x86.h"
+#include "console.h"
 
 static void consputc(int);
 
@@ -182,14 +183,6 @@ void consputc(int c)
     vgaputc(c);
 }
 
-#define INPUT_BUF 128
-struct {
-    char buf[INPUT_BUF];
-    uint r; // Read index
-    uint w; // Write index
-    uint e; // Edit index
-} input;
-
 #define C(x) ((x) - '@') // Control-x
 
 void consoleintr(int (*getc)(void))
@@ -215,6 +208,16 @@ void consoleintr(int (*getc)(void))
             if (input.e != input.w) {
                 input.e--;
                 consputc(BACKSPACE);
+            }
+            break;
+        case C('C'): // ctrl+c
+            /*
+             * TODO after signals are implemented
+             * properly send a sigint to fgproc
+             */
+            if (input.fgproc) {
+                input.fgproc->killed = 1;
+                wakeup(&input.r);
             }
             break;
         default:
@@ -245,6 +248,7 @@ int consoleread(struct inode* ip, char* dst, int n)
     iunlock(ip);
     target = n;
     acquire(&cons.lock);
+    input.fgproc = myproc(); // set foreground proc
     while (n > 0) {
         while (input.r == input.w) {
             if (myproc()->killed) {
