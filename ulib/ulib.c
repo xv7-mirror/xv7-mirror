@@ -17,39 +17,11 @@ char* strcpy(char* s, const char* t)
     return os;
 }
 
-char* strncpy(char* dst, const char* src, int n)
-{
-    int i;
-    char* tmp;
-    tmp = dst;
-    for (i = 0; i < n; i++)
-        *dst++ = *src++;
-    return tmp;
-}
-
 int strcmp(const char* p, const char* q)
 {
     while (*p && *p == *q)
         p++, q++;
     return (uchar)*p - (uchar)*q;
-}
-
-int strncmp(const char* p, const char* q, int n)
-{
-    int i;
-
-    for (i = 0; i < n; i++)
-    {
-        uchar uc1 = (unsigned char)p[i];
-        uchar uc2 = (unsigned char)q[i];
-
-        if (uc1 != uc2)
-            return uc1 - uc2;
-
-        if (uc1 == '\0')
-            return 0;
-    }
-    return 0;
 }
 
 uint strlen(const char* s)
@@ -166,10 +138,24 @@ void strcat(char* dest, const char* src)
     *dest = '\0';
 }
 
-int vsscanf(char* input, const char* fmt, va_list ap)
+int scanf(const char* fmt, ...)
 {
-    const char* f = fmt;
+    va_list ap;
+
+    char buf[500];
+    char* input;
+    const char* f;
     int items_assigned = 0;
+
+    va_start(ap, fmt);
+
+    if (gets(buf, 500) == 0) {
+        va_end(ap);
+        return -1;
+    }
+
+    input = buf;
+    f = fmt;
 
     while (*f) {
         if (*f == ' ' || *f == '\t' || *f == '\n') {
@@ -185,12 +171,15 @@ int vsscanf(char* input, const char* fmt, va_list ap)
                 input++;
                 f++;
                 continue;
-            } else {
-                break;
             }
+            break;
         }
 
         f++;
+
+        /*
+         * Handle format specifiers
+         */
 
         if (*f == 's') {
             char* dest = va_arg(ap, char*);
@@ -209,37 +198,34 @@ int vsscanf(char* input, const char* fmt, va_list ap)
 
             if (len > 0)
                 items_assigned++;
-            else
-                break;
         } else if (*f == 'd') {
             int* dest = va_arg(ap, int*);
+            char* token_start;
             int sign = 1;
-            int val = 0;
 
             while (*input == ' ' || *input == '\t' || *input == '\n'
                 || *input == '\r')
                 input++;
 
+            token_start = input;
+
             if (*input == '-') {
                 sign = -1;
                 input++;
-            } else if (*input == '+')
-                input++;
-
-            if (*input < '0' || *input > '9')
-                break;
-
-            while (*input >= '0' && *input <= '9') {
-                val = val * 10 + (*input - '0');
+            } else if (*input == '+') {
                 input++;
             }
 
-            *dest = val * sign;
-            items_assigned++;
-        } else if (*f == 'c') {
-            char* dest = va_arg(ap, char*);
-            *dest = *input++;
-            items_assigned++;
+            if (*input >= '0' && *input <= '9') {
+                *dest = atoi(token_start);
+
+                while (*input >= '0' && *input <= '9')
+                    input++;
+
+                items_assigned++;
+            } else {
+                break;
+            }
         } else {
             break;
         }
@@ -247,35 +233,9 @@ int vsscanf(char* input, const char* fmt, va_list ap)
         f++;
     }
 
+    va_end(ap);
+
     return items_assigned;
-}
-
-int sscanf(const char* str, const char* fmt, ...)
-{
-    va_list ap;
-    int n;
-
-    va_start(ap, fmt);
-    n = vsscanf((char*)str, fmt, ap);
-    va_end(ap);
-
-    return n;
-}
-
-int scanf(const char* fmt, ...)
-{
-    char buf[500];
-    va_list ap;
-    int n;
-
-    if (!gets(buf, 500))
-        return -1;
-
-    va_start(ap, fmt);
-    n = vsscanf(buf, fmt, ap);
-    va_end(ap);
-
-    return n;
 }
 
 int putchar(int c)
