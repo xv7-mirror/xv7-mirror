@@ -2,6 +2,7 @@
 #define _STDIO_H_
 
 #include <stddef.h>
+#include <stdarg.h>
 #include <fcntl.h>
 #include <sys/utsname.h>
 
@@ -35,6 +36,8 @@ void printf(const char* fmt, ...);
 void fprintf(FILE* stream, const char* fmt, ...);
 char* gets(char*, int max);
 int getcwd(char* buf, int size);
+int vsscanf(char* input, const char* fmt, va_list ap);
+int sscanf(const char* str, const char* fmt, ...);
 int scanf(const char* fmt, ...);
 FILE* fopen(const char* path, const char* mode);
 int fwrite(void* ptr, int size, int nmemb, FILE* stream);
