@@ -700,6 +700,9 @@ int dirlink(struct inode* dp, char* name, uint inum)
 }
 
 // Paths
+// Symlink path is stored in ip->addrs,
+// this is faster and doesn't take up as
+// much space.
 
 // Copy the next path element from path into name.
 // Return a pointer to the element following the copied one.
@@ -765,6 +768,7 @@ static struct inode* namex(char* path, int nameiparent, char* name)
             iunlockput(ip);
             return 0;
         }
+
         iunlockput(ip);
         ip = next;
     }
@@ -775,10 +779,49 @@ static struct inode* namex(char* path, int nameiparent, char* name)
     return ip;
 }
 
+// Follow a symlink, called by namei() and nameiparent()
+// in case the returned inode is a symlink.
+static struct inode* nameifollow(struct inode* ip)
+{
+    char name[DIRSIZ];
+
+    // ensure it's a real string
+    char target[sizeof(ip->addrs) + 1];
+    memmove(target, (char*)ip->addrs, ip->size);
+    target[ip->size] = '\0';
+
+    return namex(target, 0, name);
+}
+
 struct inode* namei(char* path)
 {
     char name[DIRSIZ];
-    return namex(path, 0, name);
+    struct inode *ip, *next;
+    int depth;
+
+    ip = namex(path, 0, name);
+
+    // if it's a symlink, follow
+    // it until we've reached the end,
+    // it's broken or we've followed
+    // too much..
+    depth = 0;
+    while (ip->type == T_SYMLINK) {
+        next = nameifollow(ip);
+        // release old inode, we don't
+        // need it anymore
+        iput(ip);
+        ip = next;
+
+        if (ip == 0)
+            return 0;
+
+        depth++;
+        if (depth > 10)
+            return 0;
+    }
+
+    return ip;
 }
 
 struct inode* nameiparent(char* path, char* name)

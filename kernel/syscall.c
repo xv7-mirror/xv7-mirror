@@ -109,6 +109,7 @@ extern int sys_fcntl(void);
 extern int sys_kgetprogname(void);
 extern int sys_ksetprogname(void);
 extern time_t sys_time(void);
+extern int sys_symlink(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork] sys_fork,
@@ -140,6 +141,7 @@ static int (*syscalls[])(void) = {
     [SYS_kgetprogname] sys_kgetprogname,
     [SYS_ksetprogname] sys_ksetprogname,
     [SYS_time] sys_time,
+    [SYS_symlink] sys_symlink,
 };
 
 void syscall(void)

@@ -34,6 +34,7 @@ int putchar(int c);
 int kgetprogname(char* dst);
 int ksetprogname(char* src);
 time_t time(void);
+int symlink(const char* target, const char* linkpath);
 
 int isatty(int fd);
 int pledge(const char* promises, const char* execpromises);

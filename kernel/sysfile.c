@@ -107,6 +107,75 @@ int sys_fstat(void)
     return filestat(f, st);
 }
 
+// Create a (soft) symlink
+int sys_symlink(void)
+{
+    char *target, *linkpath;
+    struct inode *parent, *ip, *dip;
+    char name[DIRSIZ];
+
+    if (argstr(0, &target) < 0 || argstr(1, &linkpath) < 0)
+        return -1;
+
+    begin_op();
+
+    if ((parent = nameiparent(linkpath, name)) == 0) {
+        end_op();
+        return -1;
+    }
+
+    // try to resolve the inode first,
+    // if it doesn't exist refuse to continue so
+    // we don't create a dangling symlink and fuck
+    // up the filesystem.
+    dip = namei(target);
+    if (dip == 0) {
+        end_op();
+        return -1;
+    }
+    iput(dip);
+
+    ilock(parent);
+
+    if (dirlookup(parent, name, 0)) {
+        iunlockput(parent);
+        end_op();
+        return -1;
+    }
+
+    if ((ip = ialloc(parent->dev, T_SYMLINK)) == 0) {
+        end_op();
+        iunlockput(parent);
+        return -1;
+    }
+
+    ilock(ip);
+    memset(ip->addrs, 0, sizeof(ip->addrs));
+
+    int len = strlen(target);
+
+    if (len > sizeof(ip->addrs))
+        len = sizeof(ip->addrs);
+
+    char* s = (char*)ip->addrs;
+    memmove(s, target, len);
+    s[len] = '\0';
+    ip->size = len;
+    iupdate(ip);
+    iunlock(ip);
+
+    if (dirlink(parent, name, ip->inum) < 0) {
+        iput(ip);
+        iunlockput(parent);
+        return -1;
+    }
+
+    iunlockput(parent);
+    end_op();
+
+    return 0;
+}
+
 // Create the path new as a link to the same inode as old.
 int sys_link(void)
 {

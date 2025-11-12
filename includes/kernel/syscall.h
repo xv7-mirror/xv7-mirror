@@ -28,3 +28,4 @@
 #define SYS_kgetprogname 27
 #define SYS_ksetprogname 28
 #define SYS_time 29
+#define SYS_symlink 30

@@ -38,8 +38,7 @@ int strncmp(const char* p, const char* q, int n)
 {
     int i;
 
-    for (i = 0; i < n; i++)
-    {
+    for (i = 0; i < n; i++) {
         uchar uc1 = (unsigned char)p[i];
         uchar uc2 = (unsigned char)q[i];
 
@@ -143,9 +142,10 @@ int atoi(const char* s)
     return n;
 }
 
-int memcmp(const void *s1, const void *s2, int n) {
-    const unsigned char *p1= (const unsigned char *)s1;
-    const unsigned char *p2 = (const unsigned char *)s2;
+int memcmp(const void* s1, const void* s2, int n)
+{
+    const unsigned char* p1 = (const unsigned char*)s1;
+    const unsigned char* p2 = (const unsigned char*)s2;
 
     for (int i = 0; i < n; i++) {
         if (p1[i] != p2[i]) {
@@ -496,4 +496,3 @@ int sprintf(char* buf, const char* fmt, ...)
     va_end(ap);
     return i;
 }
-
