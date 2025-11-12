@@ -31,7 +31,16 @@ FILE* fopen(const char* path, const char* mode)
     if (fd < 0)
         return 0;
     FILE* f = malloc(sizeof(FILE));
+
+    /*
+     * initialise file data
+     */
     f->fd = fd;
+    f->pos = 0;
+    f->flags = 0;
+    f->bufpos = 0;
+    f->buflen = 0;
+
     return f;
 }
 
@@ -44,6 +53,7 @@ int fread(void* ptr, int size, int nmemb, FILE* stream)
     int n = read(stream->fd, ptr, total_bytes);
     if (n < 0)
         return 0;
+    stream->pos += n;
 
     return n / size;
 }
@@ -57,6 +67,7 @@ int fwrite(void* ptr, int size, int nmemb, FILE* stream)
     int n = write(stream->fd, ptr, total_bytes);
     if (n < 0)
         return 0;
+    stream->pos += n;
 
     return n / size;
 }

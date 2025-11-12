@@ -17,11 +17,39 @@ char* strcpy(char* s, const char* t)
     return os;
 }
 
+char* strncpy(char* dst, const char* src, int n)
+{
+    int i;
+    char* tmp;
+    tmp = dst;
+    for (i = 0; i < n; i++)
+        *dst++ = *src++;
+    return tmp;
+}
+
 int strcmp(const char* p, const char* q)
 {
     while (*p && *p == *q)
         p++, q++;
     return (uchar)*p - (uchar)*q;
+}
+
+int strncmp(const char* p, const char* q, int n)
+{
+    int i;
+
+    for (i = 0; i < n; i++)
+    {
+        uchar uc1 = (unsigned char)p[i];
+        uchar uc2 = (unsigned char)q[i];
+
+        if (uc1 != uc2)
+            return uc1 - uc2;
+
+        if (uc1 == '\0')
+            return 0;
+    }
+    return 0;
 }
 
 uint strlen(const char* s)
@@ -113,6 +141,19 @@ int atoi(const char* s)
     while ('0' <= *s && *s <= '9')
         n = n * 10 + *s++ - '0';
     return n;
+}
+
+int memcmp(const void *s1, const void *s2, int n) {
+    const unsigned char *p1= (const unsigned char *)s1;
+    const unsigned char *p2 = (const unsigned char *)s2;
+
+    for (int i = 0; i < n; i++) {
+        if (p1[i] != p2[i]) {
+            return p1[i] < p2[i];
+        }
+    }
+
+    return 0;
 }
 
 void* memmove(void* vdst, const void* vsrc, int n)
@@ -376,3 +417,83 @@ int snprintf(char* buf, int size, const char* fmt, ...)
     va_end(ap);
     return i;
 }
+
+int sprintf(char* buf, const char* fmt, ...)
+{
+    int i = 0;
+    va_list ap;
+    va_start(ap, fmt);
+
+    for (const char* p = fmt; *p; p++) {
+        if (*p != '%') {
+            buf[i++] = *p;
+            continue;
+        }
+
+        p++; /* skip % */
+        if (!*p)
+            break;
+
+        if (*p == 'd') {
+            int val = va_arg(ap, int);
+            char numbuf[16];
+            int j = 0;
+            int neg = 0;
+
+            if (val < 0) {
+                neg = 1;
+                val = -val;
+            }
+
+            if (val == 0) {
+                numbuf[j++] = '0';
+            } else {
+                while (val > 0) {
+                    numbuf[j++] = '0' + (val % 10);
+                    val /= 10;
+                }
+            }
+
+            if (neg)
+                numbuf[j++] = '-';
+
+            for (int k = j - 1; k >= 0; k--)
+                buf[i++] = numbuf[k];
+
+        } else if (*p == 'x') {
+            unsigned int val = va_arg(ap, unsigned int);
+            char numbuf[16];
+            int j = 0;
+
+            if (val == 0) {
+                numbuf[j++] = '0';
+            } else {
+                while (val > 0) {
+                    int digit = val & 0xF;
+                    numbuf[j++] = digit < 10 ? '0' + digit : 'a' + (digit - 10);
+                    val >>= 4;
+                }
+            }
+
+            for (int k = j - 1; k >= 0; k--)
+                buf[i++] = numbuf[k];
+
+        } else if (*p == 's') {
+            char* s = va_arg(ap, char*);
+            while (*s)
+                buf[i++] = *s++;
+
+        } else if (*p == 'c') {
+            char c = (char)va_arg(ap, int);
+            buf[i++] = c;
+
+        } else {
+            buf[i++] = *p;
+        }
+    }
+
+    buf[i] = '\0';
+    va_end(ap);
+    return i;
+}
+

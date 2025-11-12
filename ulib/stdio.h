@@ -15,6 +15,7 @@ typedef struct {
     int bufpos;
     int buflen;
     int flags;
+    int pos;
 } FILE;
 
 int uname(struct utsname* buf);
@@ -54,6 +55,7 @@ const char* getprogname(void);
 int setprogname(char* src);
 void puts(const char* str);
 int snprintf(char* buf, int size, const char* fmt, ...);
+int sprintf(char* buf, const char* fmt, ...);
 long strtonum(
     const char* numstr, long minval, long maxval, const char** errstr);
 char* fgets(char* buf, int size, FILE* stream);
