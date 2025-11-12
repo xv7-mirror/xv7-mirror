@@ -7,15 +7,11 @@
 typedef unsigned int uint;
 
 char* strcpy(char*, const char*);
-char* strncpy(char* dst, const char* src, int n);
 void* memmove(void*, const void*, int);
 char* strchr(const char*, char c);
 int strcmp(const char*, const char*);
-int strncmp(const char* p, const char* q, int n);
 uint strlen(const char*);
 void* memset(void*, int, uint);
-char * strtok(char *s, const char *delim);
-char * strtok_r(char *s, const char *delim, char **last);
 void strcat(char* dest, const char* src);
 int strlcat(char* dst, const char* src, size_t size);
 int strcspn(const char* s, const char* reject);
