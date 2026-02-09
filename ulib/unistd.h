@@ -35,6 +35,10 @@ int kgetprogname(char* dst);
 int ksetprogname(char* src);
 time_t time(void);
 int symlink(const char* target, const char* linkpath);
+int sigaction(int, void (*)(void));
+int sigprocmask(int);
+int sigreturn(void);
+void setfg(int pid);
 
 int isatty(int fd);
 int pledge(const char* promises, const char* execpromises);

@@ -29,3 +29,11 @@
 #define SYS_ksetprogname 28
 #define SYS_time 29
 #define SYS_symlink 30
+#define SYS_sigaction 31
+#define SYS_sigprocmask 32
+#define SYS_sigreturn 33
+#define SYS_setfg 34
+
+#define SIGINT 2
+#define SIGKILL 9
+#define SIGTERM 15

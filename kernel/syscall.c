@@ -110,6 +110,10 @@ extern int sys_kgetprogname(void);
 extern int sys_ksetprogname(void);
 extern time_t sys_time(void);
 extern int sys_symlink(void);
+extern int sys_sigaction(void);
+extern int sys_sigprocmask(void);
+extern int sys_sigreturn(void);
+extern int sys_setfg(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork] sys_fork,
@@ -142,6 +146,10 @@ static int (*syscalls[])(void) = {
     [SYS_ksetprogname] sys_ksetprogname,
     [SYS_time] sys_time,
     [SYS_symlink] sys_symlink,
+    [SYS_sigaction] = sys_sigaction,
+    [SYS_sigprocmask] = sys_sigprocmask,
+    [SYS_sigreturn] = sys_sigreturn,
+    [SYS_setfg] = sys_setfg,
 };
 
 void syscall(void)

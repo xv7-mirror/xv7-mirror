@@ -181,9 +181,15 @@ int main(void)
                 printf("cannot cd %s\n", buf + 3);
             continue;
         }
-        if (fork1() == 0)
+
+        int pid = fork1();
+        if (pid == 0) {
             runcmd(parsecmd(buf));
-        wait();
+        } else {
+            setfg(pid);
+            wait();
+            setfg(getpid());
+        }
     }
     exit(0);
 }

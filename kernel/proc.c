@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "syscall.h"
 
 struct {
     struct spinlock lock;
@@ -79,6 +80,11 @@ found:
     p->state = EMBRYO;
     p->pid = nextpid++;
 
+    p->pending = 0;
+    p->blocked = 0;
+    for (int i = 0; i < 32; i++)
+        p->handlers[i] = 0;
+    p->sig_tf = 0;
     release(&ptable.lock);
 
     // Allocate kernel stack.
@@ -278,6 +284,10 @@ int wait(void)
                 p->parent = 0;
                 p->name[0] = 0;
                 p->killed = 0;
+                if (p->sig_tf) {
+                    kfree((char*)p->sig_tf);
+                    p->sig_tf = 0;
+                }
                 p->state = UNUSED;
                 release(&ptable.lock);
                 return pid;
@@ -421,6 +431,11 @@ void sleep(void* chan, struct spinlock* lk)
     // Tidy up.
     p->chan = 0;
 
+    if (p->killed || (p->pending & ~p->blocked)) {
+        // We don't exit here, we just need to make sure
+        // the syscall layer eventually returns to trap.c
+    }
+
     // Reacquire original lock.
     if (lk != &ptable.lock) { // DOC: sleeplock2
         release(&ptable.lock);
@@ -450,7 +465,7 @@ void wakeup(void* chan)
 // Kill the process with the given pid.
 // Process won't exit until it returns
 // to user space (see trap in trap.c).
-int kill(int pid)
+int kill(int pid, int sig)
 {
     struct proc* p;
 
@@ -462,7 +477,11 @@ int kill(int pid)
     acquire(&ptable.lock);
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
         if (p->pid == pid) {
-            p->killed = 1;
+            if (sig == SIGKILL) {
+                p->killed = 1;
+            } else {
+                p->pending |= (1 << sig);
+            }
             // Wake process from sleep if necessary.
             if (p->state == SLEEPING)
                 p->state = RUNNABLE;

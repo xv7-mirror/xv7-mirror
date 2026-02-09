@@ -15,6 +15,7 @@
 #include "proc.h"
 #include "x86.h"
 #include "console.h"
+#include "syscall.h"
 
 static void consputc(int);
 
@@ -211,12 +212,12 @@ void consoleintr(int (*getc)(void))
             }
             break;
         case C('C'): // ctrl+c
-            /*
-             * TODO after signals are implemented
-             * properly send a sigint to fgproc
-             */
             if (input.fgproc) {
-                input.fgproc->killed = 1;
+                kill(input.fgproc->pid, SIGINT);
+                input.e = input.r;
+                input.e = input.r;
+                input.buf[input.e++ % INPUT_BUF] = '\n';
+                input.w = input.e;
                 wakeup(&input.r);
             }
             break;
@@ -248,10 +249,9 @@ int consoleread(struct inode* ip, char* dst, int n)
     iunlock(ip);
     target = n;
     acquire(&cons.lock);
-    input.fgproc = myproc(); // set foreground proc
     while (n > 0) {
         while (input.r == input.w) {
-            if (myproc()->killed) {
+            if (myproc()->killed || (myproc()->pending & ~myproc()->blocked)) {
                 release(&cons.lock);
                 ilock(ip);
                 return -1;
@@ -284,8 +284,14 @@ int consolewrite(struct inode* ip, char* buf, int n)
 
     iunlock(ip);
     acquire(&cons.lock);
-    for (i = 0; i < n; i++)
+    for (i = 0; i < n; i++) {
+        if (myproc()->killed || (myproc()->pending & ~myproc()->blocked)) {
+            release(&cons.lock);
+            ilock(ip);
+            return -1;
+        }
         consputc(buf[i] & 0xff);
+    }
     release(&cons.lock);
     ilock(ip);
 

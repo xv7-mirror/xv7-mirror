@@ -7,6 +7,7 @@
 #include "x86.h"
 #include "traps.h"
 #include "spinlock.h"
+#include "syscall.h"
 
 // Interrupt descriptor table (shared by all CPUs).
 struct gatedesc idt[256];
@@ -29,12 +30,18 @@ void idtinit(void) { lidt(idt, sizeof(idt)); }
 
 void trap(struct trapframe* tf)
 {
+    if (myproc() && (tf->cs & 3) == DPL_USER) {
+        if (myproc()->killed || (myproc()->pending & ~myproc()->blocked)) {
+            exit();
+        }
+    }
+
     if (tf->trapno == T_SYSCALL) {
-        if (myproc()->killed)
+        if (myproc()->killed || (myproc()->pending & ~myproc()->blocked))
             exit();
         myproc()->tf = tf;
         syscall();
-        if (myproc()->killed)
+        if (myproc()->killed || (myproc()->pending & ~myproc()->blocked))
             exit();
         return;
     }
@@ -84,6 +91,41 @@ void trap(struct trapframe* tf)
             myproc()->pid, myproc()->name, tf->trapno, tf->err, cpuid(),
             tf->eip, rcr2());
         myproc()->killed = 1;
+    }
+
+    if (myproc() && (tf->cs & 3) == DPL_USER) {
+        struct proc* p = myproc();
+        uint pending = p->pending & ~p->blocked;
+
+        if (pending) {
+            int sig = 0;
+            for (int i = 0; i < 32; i++) {
+                if (pending & (1 << i)) {
+                    sig = i;
+                    break;
+                }
+            }
+
+            if (sig) {
+                p->pending &= ~(1 << sig);
+
+                if (sig == SIGKILL || (sig == SIGINT && !p->handlers[sig])) {
+                    p->killed = 1;
+                    if (p->state == SLEEPING)
+                        p->state = RUNNABLE;
+                } else if (p->handlers[sig]) {
+                    if (!p->sig_tf)
+                        p->sig_tf = (struct trapframe*)kalloc();
+
+                    if (p->sig_tf) {
+                        *p->sig_tf = *tf;
+                        tf->esp -= 4;
+                        *((uint*)tf->esp) = sig;
+                        tf->eip = (uint)p->handlers[sig];
+                    }
+                }
+            }
+        }
     }
 
     // Force process exit if it has been killed and is in user space.

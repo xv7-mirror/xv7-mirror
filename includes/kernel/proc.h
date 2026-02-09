@@ -48,6 +48,10 @@ struct proc {
     struct file* ofile[NOFILE]; // Open files
     struct inode* cwd; // Current directory
     char name[16]; // Process name (debugging)
+    uint pending;
+    uint blocked;
+    void (*handlers[32])(void);
+    struct trapframe* sig_tf;
 };
 
 // Process memory is laid out contiguously, low addresses first:

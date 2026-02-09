@@ -25,6 +25,10 @@ int sleep(int);
 int uptime(void);
 int getppid(void);
 int ioctl(int, int, void*);
+int sigaction(int, void (*)(void));
+int sigprocmask(int);
+int sigreturn(void);
+int setfg(void);
 
 // ulib.c
 int stat(const char*, struct stat*);
